@@ -1,7 +1,11 @@
-import React from 'react';
 import { FileText, Check, Activity, Sparkles } from 'lucide-react';
 
-export default function ServicesView({ t, openServiceModal }) {
+interface ServicesViewProps {
+  t: any;
+  openServiceModal: (serviceType: string) => void;
+}
+
+export default function ServicesView({ t, openServiceModal }: ServicesViewProps) {
   return (
     <section className="pt-2 space-y-6 animate-pop">
       <div className="text-center max-w-2xl mx-auto mb-8">
@@ -20,7 +24,7 @@ export default function ServicesView({ t, openServiceModal }) {
           </div>
           
           <div className="flex-1 space-y-3 my-6">
-            {t.services.pkg1Features.map((feature, idx) => (
+            {t.services.pkg1Features.map((feature: string, idx: number) => (
               <div key={idx} className="flex items-start gap-2">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span className="text-xs text-slate-300 leading-relaxed">{feature}</span>
@@ -46,7 +50,7 @@ export default function ServicesView({ t, openServiceModal }) {
           </div>
           
           <div className="flex-1 space-y-3 my-6">
-            {t.services.pkg2Features.map((feature, idx) => (
+            {t.services.pkg2Features.map((feature: string, idx: number) => (
               <div key={idx} className="flex items-start gap-2">
                 <Check className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
                 <span className="text-xs text-slate-200 leading-relaxed font-medium">{feature}</span>
@@ -69,7 +73,7 @@ export default function ServicesView({ t, openServiceModal }) {
           </div>
           
           <div className="flex-1 space-y-3 my-6">
-            {t.services.pkg3Features.map((feature, idx) => (
+            {t.services.pkg3Features.map((feature: string, idx: number) => (
               <div key={idx} className="flex items-start gap-2">
                 <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span className="text-xs text-slate-300 leading-relaxed">{feature}</span>

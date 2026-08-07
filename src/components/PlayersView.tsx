@@ -1,6 +1,19 @@
-import React from 'react';
+interface Player {
+  id: string;
+  name: string;
+  team: string;
+  position: string;
+  goals: number;
+  assists: number;
+  rating: number;
+  avatar: string;
+}
 
-export default function PlayersView({ TOP_PLAYERS }) {
+interface PlayersViewProps {
+  TOP_PLAYERS: Player[];
+}
+
+export default function PlayersView({ TOP_PLAYERS }: PlayersViewProps) {
   return (
     <div className="space-y-4 animate-pop">
       <h2 className="text-xl font-bold text-white">Database Pemain & Rating xG</h2>

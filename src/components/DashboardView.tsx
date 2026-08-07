@@ -1,5 +1,29 @@
-import React from 'react';
+import type { ComponentType } from 'react';
 import { Flame, Play, Zap, Activity, Shield, Users, FileText, BarChart3, Award, ChevronRight, ArrowUpRight } from 'lucide-react';
+
+interface UpcomingMatch {
+  [key: string]: any;
+}
+
+interface DashboardViewProps {
+  t: any;
+  handleNavClick: (navId: string) => void;
+  openServiceModal: (serviceType: string) => void;
+  setIsCompareModalOpen: (open: boolean) => void;
+  isLoadingMatches: boolean;
+  apiError: string | null;
+  upcomingMatches: UpcomingMatch[];
+  fetchUpcomingMatches: () => void;
+  setSelectedH2HMatch: (match: any) => void;
+  TOP_PLAYERS: any[];
+  TACTICAL_ARTICLES: any[];
+  handleArticleClick: (article: any) => void;
+  LIGA1_TEAMS: any[];
+  AnimatedCounter: ComponentType<{ value: string; duration?: number }>;
+  Sparkline: ComponentType<{ color?: string; data?: number[] }>;
+  TeamBadge: ComponentType<{ name: string; size?: string }>;
+  formatMatchDate: (dateStr?: string, timeStr?: string) => string;
+}
 
 export default function DashboardView({
   t,
@@ -19,7 +43,7 @@ export default function DashboardView({
   Sparkline,
   TeamBadge,
   formatMatchDate,
-}) {
+}: DashboardViewProps) {
   return (
     <>
       {/* Hero Banner Section */}
@@ -335,7 +359,7 @@ export default function DashboardView({
                       <td className="py-2.5 text-center font-mono font-black text-orange-400">{team.points}</td>
                       <td className="py-2.5 text-right pr-2">
                         <div className="flex items-center justify-end gap-0.5 sm:gap-1">
-                          {team.form.map((res, fIdx) => (
+                          {team.form.map((res: string, fIdx: number) => (
                             <span key={fIdx} className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded text-[8px] font-bold flex items-center justify-center transition-transform hover:scale-125 ${
                               res === 'W' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                               res === 'D' ? 'bg-slate-500/20 text-slate-400 border border-slate-500/30' :

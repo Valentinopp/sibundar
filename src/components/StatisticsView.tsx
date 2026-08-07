@@ -1,4 +1,3 @@
-import React from 'react';
 import { BarChart3, Zap, Activity, Shield } from 'lucide-react';
 
 export default function StatisticsView() {

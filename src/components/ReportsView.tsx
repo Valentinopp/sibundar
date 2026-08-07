@@ -1,5 +1,33 @@
-import React from 'react';
 import { ArrowLeft, Bookmark, Share2, Clock, Zap, CheckCircle2, ChevronRight, BookOpen, ArrowUpRight } from 'lucide-react';
+
+interface ArticleSection {
+  heading: string;
+  content: string;
+}
+
+interface Article {
+  id: string;
+  title: string;
+  summary: string;
+  date: string;
+  readTime: string;
+  author: string;
+  role: string;
+  category: string;
+  badgeColor: string;
+  coverImage?: string;
+  keyTakeaways?: string[];
+  sections?: ArticleSection[];
+}
+
+interface ReportsViewProps {
+  selectedArticle: Article | null;
+  setSelectedArticle: (article: Article | null) => void;
+  articleCategory: string;
+  setArticleCategory: (category: string) => void;
+  TACTICAL_ARTICLES: Article[];
+  handleArticleClick: (article: Article) => void;
+}
 
 export default function ReportsView({
   selectedArticle,
@@ -8,7 +36,7 @@ export default function ReportsView({
   setArticleCategory,
   TACTICAL_ARTICLES,
   handleArticleClick,
-}) {
+}: ReportsViewProps) {
   return (
     <div className="space-y-6">
       {selectedArticle ? (
@@ -89,7 +117,7 @@ export default function ReportsView({
                 <span>Poin Taktis Utama (Key Takeaways)</span>
               </div>
               <ul className="space-y-2">
-                {selectedArticle.keyTakeaways.map((point, idx) => (
+                {selectedArticle.keyTakeaways.map((point: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-200">
                     <CheckCircle2 className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
                     <span className="leading-relaxed">{point}</span>
@@ -101,7 +129,7 @@ export default function ReportsView({
 
           {selectedArticle.sections && selectedArticle.sections.length > 0 && (
             <div className="space-y-6 pt-4 text-slate-200 text-sm leading-relaxed">
-              {selectedArticle.sections.map((sec, idx) => (
+              {selectedArticle.sections.map((sec: ArticleSection, idx: number) => (
                 <div key={idx} className="space-y-3 bg-[#111827]/60 p-5 sm:p-6 rounded-2xl border border-white/[0.06] hover:border-white/10 transition-colors">
                   <h2 className="text-base sm:text-lg font-bold text-orange-400 flex items-center gap-2">
                     <ChevronRight className="w-4 h-4 text-orange-500" />
@@ -147,8 +175,8 @@ export default function ReportsView({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {TACTICAL_ARTICLES
-              .filter(a => articleCategory === 'Semua' || a.category === articleCategory)
-              .map((article) => (
+              .filter((a: Article) => articleCategory === 'Semua' || a.category === articleCategory)
+              .map((article: Article) => (
                 <div 
                   key={article.id}
                   onClick={() => handleArticleClick(article)}

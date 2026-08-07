@@ -1,7 +1,30 @@
-import React from 'react';
+import type { ComponentType } from 'react';
 import { Shield } from 'lucide-react';
 
-export default function TeamsView({ LIGA1_TEAMS, TEAM_INFO, TeamBadge }) {
+interface Team {
+  id: number;
+  name: string;
+  nickname: string;
+  played: number;
+  points: number;
+  avgXg?: number;
+  [key: string]: any;
+}
+
+interface TeamInfo {
+  coach?: string;
+  stadium?: string;
+  city?: string;
+  [key: string]: any;
+}
+
+interface TeamsViewProps {
+  LIGA1_TEAMS: Team[];
+  TEAM_INFO: Record<string, TeamInfo>;
+  TeamBadge: ComponentType<{ name: string; size?: string }>;
+}
+
+export default function TeamsView({ LIGA1_TEAMS, TEAM_INFO, TeamBadge }: TeamsViewProps) {
   return (
     <div className="space-y-6 animate-pop">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-[#111827] to-slate-900 border border-white/[0.08]">
