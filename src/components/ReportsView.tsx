@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface Article {
@@ -156,15 +156,7 @@ const prepareApiHtml = (rawHtml: string): string => {
   return '<!doctype html>\n' + doc.documentElement.outerHTML;
 };
 
-export default function ReportsView({
-  // Props tetap diterima agar App.tsx lama tidak perlu diubah.
-  selectedArticle,
-  setSelectedArticle,
-  articleCategory,
-  setArticleCategory,
-  TACTICAL_ARTICLES,
-  handleArticleClick,
-}: ReportsViewProps) {
+export default function ReportsView(_props: ReportsViewProps) {
   const [htmlContent, setHtmlContent] = useState('');
   const [iframeHeight, setIframeHeight] = useState(1200);
   const [isLoading, setIsLoading] = useState(true);

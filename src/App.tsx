@@ -1340,15 +1340,11 @@ export default function App() {
               t={t}
               handleNavClick={(navId: string) => navigate(navId === 'dashboard' ? '/' : `/${navId}`)}
               openServiceModal={openServiceModal}
-              setIsCompareModalOpen={setIsCompareModalOpen}
               isLoadingMatches={isLoadingMatches}
               apiError={apiError}
               upcomingMatches={upcomingMatches}
               fetchUpcomingMatches={fetchUpcomingMatches}
               setSelectedH2HMatch={setSelectedH2HMatch}
-              TOP_PLAYERS={TOP_PLAYERS}
-              TACTICAL_ARTICLES={TACTICAL_ARTICLES}
-              handleArticleClick={handleArticleClick}
               LIGA1_TEAMS={LIGA1_TEAMS}
               AnimatedCounter={AnimatedCounter}
               Sparkline={Sparkline}
@@ -1403,20 +1399,17 @@ export default function App() {
             
             <div className="lg:col-span-2 space-y-4">
               <Link to="/" className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNavClick('/')}>
-                <div className="w-10 h-10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
-                  <img
-                    src="favicon.png"
-                    alt="Logo Sibundar"
-                    className="w-full h-full object-contain"
-                  />
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
+                  <div className="w-full h-full bg-[#0B1220] rounded-[14px] flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-orange-400" />
+                  </div>
                 </div>
                 <div>
-                  <span className="font-black text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">
-                    Sibundar
-                  </span>
-                  <p className="text-xs text-slate-400 font-medium">
-                    Football Tactical Intelligence
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-black text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">Sibundar</span>
+                    <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">PRO</span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-medium">Football Tactical Intelligence</p>
                 </div>
               </Link>
 

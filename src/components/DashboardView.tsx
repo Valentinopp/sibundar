@@ -14,9 +14,7 @@ interface DashboardViewProps {
   upcomingMatches: UpcomingMatch[];
   fetchUpcomingMatches: () => void;
   setSelectedH2HMatch: (match: any) => void;
-  TOP_PLAYERS: any[];
-  TACTICAL_ARTICLES: any[];
-  handleArticleClick: (article: any) => void;
+
   LIGA1_TEAMS: any[];
   AnimatedCounter: ComponentType<{ value: string; duration?: number }>;
   Sparkline: ComponentType<{ color?: string; data?: number[] }>;
@@ -33,9 +31,7 @@ export default function DashboardView({
   upcomingMatches,
   fetchUpcomingMatches,
   setSelectedH2HMatch,
-  TOP_PLAYERS,
-  TACTICAL_ARTICLES,
-  handleArticleClick,
+
   LIGA1_TEAMS,
   AnimatedCounter,
   Sparkline,
