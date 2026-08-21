@@ -1,4 +1,4 @@
-import { useState, useEffect, type ComponentType } from 'react';
+import { useState, useEffect, useRef, type ComponentType } from 'react';
 import { Calendar, BarChart3, RefreshCw } from 'lucide-react';
 
 interface MatchRecord {
@@ -41,10 +41,89 @@ export default function MatchesView({
   setIsCompareModalOpen,
   formatMatchDate = (d) => d || '',
 }: MatchesViewProps) {
-  const [selectedSeason, setSelectedSeason] = useState<string>('2025-26');
-  const [internalWeek, setInternalWeek] = useState<string>('34');
+  const [selectedSeason, setSelectedSeason] = useState<string>('2026-27');
+  const [internalWeek, setInternalWeek] = useState<string>('1');
+
+  // Menandai apakah sinkronisasi pekan otomatis untuk musim aktif
+  // sudah dilakukan. Setelah itu pilihan manual user tidak ditimpa.
+  const autoWeekSyncedRef = useRef(false);
 
   const activeWeek = externalSelectedPekan || internalWeek;
+
+  const getWeekMatches = async (season: string, week: number): Promise<MatchRecord[]> => {
+    try {
+      const response = await fetch(
+        `https://sibundar-api.vercel.app/usr/match/match_history?season=${encodeURIComponent(season)}&week=${week}&_t=${Date.now()}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+        }
+      );
+
+      if (!response.ok) return [];
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object') {
+        if (Array.isArray(data.matches)) return data.matches;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data.result)) return data.result;
+      }
+    } catch (err) {
+      console.warn(`Gagal mengecek Pekan ${week}:`, err);
+    }
+
+    return [];
+  };
+
+  const getLatestWeekForSeason = async (season: string): Promise<string> => {
+    const today = new Date();
+
+    // Cek seluruh pekan 1-34 dari API secara paralel.
+    const weekResults = await Promise.all(
+      Array.from({ length: 34 }, (_, index) => getWeekMatches(season, index + 1))
+    );
+
+    let latestWeek = 1;
+
+    weekResults.forEach((weekMatches, index) => {
+      const weekNumber = index + 1;
+
+      // Pekan dianggap "sudah dimulai" ketika minimal satu pertandingan
+      // pada pekan tersebut memiliki tanggal pertandingan <= hari ini.
+      const hasStarted = weekMatches.some((match) => {
+        const dateValue = match.match_date || match.tanggal;
+        if (!dateValue) return false;
+
+        const matchDate = new Date(dateValue);
+        return !Number.isNaN(matchDate.getTime()) && matchDate <= today;
+      });
+
+      if (hasStarted) {
+        latestWeek = Math.max(latestWeek, weekNumber);
+      }
+    });
+
+    return String(Math.min(Math.max(latestWeek, 1), 34));
+  };
+
+  const handleSeasonChange = async (season: string) => {
+    setSelectedSeason(season);
+
+    // Jangan mempertahankan pekan lama ketika musim diganti.
+    // Tentukan otomatis pekan terbaru berdasarkan tanggal pertandingan API.
+    const latestWeek = await getLatestWeekForSeason(season);
+
+    if (externalSetSelectedPekan) {
+      externalSetSelectedPekan(latestWeek);
+    } else {
+      setInternalWeek(latestWeek);
+    }
+  };
 
   const handleWeekChange = (w: string) => {
     if (externalSetSelectedPekan) {
@@ -65,7 +144,7 @@ export default function MatchesView({
 
       const targetWeek = week === 'all' ? '1' : week;
       const response = await fetch(
-        `https://sibundar-api.vercel.app/match_history?season=${season}&week=${targetWeek}&_t=${Date.now()}`,
+        `https://sibundar-api.vercel.app/usr/match/match_history?season=${season}&week=${targetWeek}&_t=${Date.now()}`,
         {
           cache: 'no-store',
           headers: {
@@ -98,6 +177,36 @@ export default function MatchesView({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // Reset status setiap kali musim berubah.
+    autoWeekSyncedRef.current = false;
+
+    const resolveLatestWeek = async () => {
+      const latestWeek = await getLatestWeekForSeason(selectedSeason);
+
+      if (cancelled || autoWeekSyncedRef.current) return;
+
+      autoWeekSyncedRef.current = true;
+
+      // Saat halaman pertama dibuka, atau saat musim diganti,
+      // selalu pakai pekan terbaru dari API.
+      // Ini sengaja menimpa nilai awal dari App.tsx (mis. 34).
+      if (externalSetSelectedPekan) {
+        externalSetSelectedPekan(latestWeek);
+      } else {
+        setInternalWeek(latestWeek);
+      }
+    };
+
+    resolveLatestWeek();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSeason]);
 
   useEffect(() => {
     fetchMatchHistory(selectedSeason, activeWeek);
@@ -135,9 +244,10 @@ export default function MatchesView({
             <span className="text-xs font-bold text-slate-400">Musim:</span>
             <select
               value={selectedSeason}
-              onChange={(e) => setSelectedSeason(e.target.value)}
+              onChange={(e) => handleSeasonChange(e.target.value)}
               className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-orange-500 cursor-pointer hover:border-white/20 transition-colors font-semibold"
             >
+              <option value="2026-27">2026-27</option>
               <option value="2025-26">2025-26</option>
               <option value="2024-25">2024-25</option>
             </select>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -94,19 +94,6 @@ const TRANSLATIONS: Record<string, any> = {
       scoutingDatabase: 'Basis Data Scouting',
       analysisRequests: 'Permintaan Analisis',
       funAndClubs: 'Fun Football & Klub',
-    },
-    featuredMatch: {
-      badge: 'Pertandingan Pilihan • LANGSUNG 68\'',
-      stadium: 'Stadion Gelora Bandung Lautan Api',
-      homeRank: 'Kandang • Peringkat ke-1',
-      awayRank: 'Tandang • Peringkat ke-3',
-      liveTelemetry: 'Telemetri Laga Langsung',
-      possession: 'Penguasaan Bola',
-      shotsOnTarget: 'Tembakan Akurat (Total)',
-      passAccuracy: 'Akurasi Umpan',
-      corners: 'Tendangan Sudut',
-      yellowCards: 'Kartu Kuning',
-      openDashboard: 'Buka Dasbor Laga Lengkap & Telemetri Video',
     },
     upcoming: {
       title: 'Jadwal Pertandingan Mendatang',
@@ -265,19 +252,6 @@ const TRANSLATIONS: Record<string, any> = {
       scoutingDatabase: 'Scouting Database',
       analysisRequests: 'Analysis Requests',
       funAndClubs: 'Fun Football & Clubs',
-    },
-    featuredMatch: {
-      badge: 'Featured Match • LIVE 68\'',
-      stadium: 'Gelora Bandung Lautan Api Stadium',
-      homeRank: 'Home • 1st Place',
-      awayRank: 'Away • 3rd Place',
-      liveTelemetry: 'Live Match Telemetry',
-      possession: 'Possession',
-      shotsOnTarget: 'Shots on Target (Total)',
-      passAccuracy: 'Pass Accuracy',
-      corners: 'Corner Kicks',
-      yellowCards: 'Yellow Cards',
-      openDashboard: 'Open Full Match Dashboard & Video Telemetry',
     },
     upcoming: {
       title: 'Upcoming Matches',
@@ -565,24 +539,312 @@ const TACTICAL_ARTICLES = [
 ];
 
 const LIGA1_TEAMS = [
-  { id: 1, name: 'Persib Bandung', nickname: 'Maung Bandung', played: 34, w: 24, d: 7, l: 3, gf: 59, ga: 22, gd: 37, points: 79, form: ['W', 'W', 'W', 'W', 'D'], isRelegation: false, squadSize: 28, avgXg: 1.92 },
-  { id: 2, name: 'Borneo FC', nickname: 'Pesut Etam', played: 34, w: 25, d: 4, l: 5, gf: 74, ga: 31, gd: 43, points: 79, form: ['W', 'W', 'W', 'D', 'W'], isRelegation: false, squadSize: 26, avgXg: 2.05 },
-  { id: 3, name: 'Persija Jakarta', nickname: 'Macan Kemayoran', played: 34, w: 22, d: 5, l: 7, gf: 65, ga: 29, gd: 36, points: 71, form: ['W', 'W', 'L', 'W', 'W'], isRelegation: false, squadSize: 29, avgXg: 1.81 },
-  { id: 4, name: 'Persebaya Surabaya', nickname: 'Bajul Ijo', played: 34, w: 16, d: 10, l: 8, gf: 61, ga: 35, gd: 26, points: 58, form: ['W', 'W', 'D', 'W', 'W'], isRelegation: false, squadSize: 27, avgXg: 1.68 },
-  { id: 5, name: 'PSM Makassar', nickname: 'Juku Eja', played: 34, w: 16, d: 8, l: 10, gf: 54, ga: 38, gd: 16, points: 56, form: ['W', 'D', 'W', 'L', 'W'], isRelegation: false, squadSize: 26, avgXg: 1.55 },
-  { id: 6, name: 'Bhayangkara FC', nickname: 'The Guardian', played: 34, w: 16, d: 5, l: 13, gf: 53, ga: 45, gd: 8, points: 53, form: ['L', 'L', 'W', 'L', 'W'], isRelegation: false, squadSize: 28, avgXg: 1.48 },
-  { id: 7, name: 'Malut United', nickname: 'Laskar Kie Raha', played: 34, w: 15, d: 8, l: 11, gf: 68, ga: 53, gd: 15, points: 53, form: ['W', 'W', 'L', 'D', 'L'], isRelegation: false, squadSize: 25, avgXg: 1.62 },
-  { id: 8, name: 'Dewa United', nickname: 'Tangsel Warriors', played: 34, w: 16, d: 5, l: 13, gf: 44, ga: 37, gd: 7, points: 53, form: ['W', 'W', 'W', 'L', 'L'], isRelegation: false, squadSize: 27, avgXg: 1.42 },
-  { id: 9, name: 'Bali United', nickname: 'Serdadu Tridatu', played: 34, w: 14, d: 9, l: 11, gf: 57, ga: 48, gd: 9, points: 51, form: ['W', 'L', 'L', 'W', 'W'], isRelegation: false, squadSize: 30, avgXg: 1.51 },
-  { id: 10, name: 'Arema FC', nickname: 'Singo Edan', played: 34, w: 13, d: 9, l: 12, gf: 53, ga: 47, gd: 6, points: 48, form: ['L', 'L', 'W', 'W', 'W'], isRelegation: false, squadSize: 28, avgXg: 1.39 },
-  { id: 11, name: 'Persik Kediri', nickname: 'Macan Putih', played: 34, w: 13, d: 8, l: 13, gf: 48, ga: 46, gd: 2, points: 47, form: ['D', 'W', 'L', 'W', 'D'], isRelegation: false, squadSize: 26, avgXg: 1.35 },
-  { id: 12, name: 'Persita Tangerang', nickname: 'Pendekar Cisadane', played: 34, w: 13, d: 6, l: 15, gf: 38, ga: 37, gd: 1, points: 45, form: ['W', 'L', 'L', 'D', 'L'], isRelegation: false, squadSize: 27, avgXg: 1.24 },
-  { id: 13, name: 'Persis Solo', nickname: 'Laskar Sambernyawa', played: 34, w: 12, d: 8, l: 14, gf: 50, ga: 52, gd: -2, points: 44, form: ['L', 'W', 'D', 'W', 'L'], isRelegation: false, squadSize: 29, avgXg: 1.38 },
-  { id: 14, name: 'Barito Putera', nickname: 'Laskar Antasari', played: 34, w: 11, d: 8, l: 15, gf: 43, ga: 51, gd: -8, points: 41, form: ['D', 'L', 'W', 'L', 'D'], isRelegation: false, squadSize: 26, avgXg: 1.21 },
-  { id: 15, name: 'PSIS Semarang', nickname: 'Laskar Mahesa Jenar', played: 34, w: 10, d: 8, l: 16, gf: 39, ga: 53, gd: -14, points: 38, form: ['L', 'L', 'D', 'W', 'L'], isRelegation: false, squadSize: 27, avgXg: 1.15 },
-  { id: 16, name: 'Madura United', nickname: 'Laskar Sapeh Kerrab', played: 34, w: 9, d: 9, l: 16, gf: 41, ga: 62, gd: -21, points: 36, form: ['L', 'D', 'L', 'L', 'W'], isRelegation: true, squadSize: 28, avgXg: 1.18 },
-  { id: 17, name: 'PSS Sleman', nickname: 'Super Elja', played: 34, w: 8, d: 10, l: 16, gf: 36, ga: 56, gd: -20, points: 34, form: ['L', 'L', 'D', 'D', 'L'], isRelegation: true, squadSize: 26, avgXg: 1.10 },
-  { id: 18, name: 'Semen Padang', nickname: 'Kabau Sirah', played: 34, w: 7, d: 10, l: 17, gf: 33, ga: 58, gd: -25, points: 31, form: ['L', 'D', 'L', 'L', 'L'], isRelegation: true, squadSize: 25, avgXg: 1.02 },
+  {
+    id: 1,
+    name: 'Arema FC',
+    nickname: 'Singo Edan',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 2,
+    name: 'Bali United FC',
+    nickname: 'Serdadu Tridatu',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 3,
+    name: 'Bhayangkara Presisi Lampung FC',
+    nickname: 'Bhayangkara',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 4,
+    name: 'Borneo FC Samarinda',
+    nickname: 'Pesut Etam',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 5,
+    name: 'Dewa United Banten FC',
+    nickname: 'Tangsel Warriors',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 6,
+    name: 'Garudayaksa FC',
+    nickname: 'Garudayaksa',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 7,
+    name: 'Isenmulang Kalteng FC',
+    nickname: 'Isenmulang',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 8,
+    name: 'Java United FC',
+    nickname: 'Java United',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 9,
+    name: 'Madura United FC',
+    nickname: 'Laskar Sape Kerrab',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 10,
+    name: 'Persebaya Surabaya',
+    nickname: 'Bajul Ijo',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 11,
+    name: 'Persib Bandung',
+    nickname: 'Maung Bandung',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 12,
+    name: 'Persija Jakarta',
+    nickname: 'Macan Kemayoran',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 13,
+    name: 'Persijap Jepara',
+    nickname: 'Persijap',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 14,
+    name: 'Persik Kediri',
+    nickname: 'Macan Putih',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 15,
+    name: 'Persita',
+    nickname: 'Pendekar Cisadane',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 16,
+    name: 'PSIM Yogyakarta',
+    nickname: 'PSIM',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 17,
+    name: 'PSM Makassar',
+    nickname: 'Juku Eja',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
+  {
+    id: 18,
+    name: 'PSS Sleman',
+    nickname: 'Super Elja',
+    played: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+    form: [],
+    isRelegation: false,
+    squadSize: 0,
+    avgXg: 0,
+  },
 ];
 
 const PAST_MATCHES_HISTORY = [
@@ -758,7 +1020,11 @@ export default function App() {
   const [articleCategory, setArticleCategory] = useState('Semua');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPekan, setSelectedPekan] = useState('34');
+  const [selectedPekan, setSelectedPekan] = useState('1');
+
+  // Otomatis menentukan pekan aktif hanya sekali setelah data jadwal tersedia.
+  // Setelah user memilih pekan secara manual, pilihan tersebut tidak ditimpa.
+  const hasInitializedCurrentWeek = useRef(false);
 
   // Form states
   const [requestServiceType, setRequestServiceType] = useState('basic');
@@ -775,7 +1041,7 @@ export default function App() {
     try {
       setIsLoadingMatches(true);
       setApiError(null);
-      const res = await fetch(`https://sibundar-api.vercel.app/upcoming_matches?_t=${Date.now()}`, {
+      const res = await fetch(`https://sibundar-api.vercel.app/usr/match/upcoming_matches?_t=${Date.now()}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' },
         cache: 'no-store'
@@ -810,6 +1076,58 @@ export default function App() {
   useEffect(() => {
     fetchUpcomingMatches();
   }, []);
+
+  useEffect(() => {
+    if (hasInitializedCurrentWeek.current || upcomingMatches.length === 0) {
+      return;
+    }
+
+    const seasonMatches = upcomingMatches.filter(
+      (match: any) => String(match.season || '2026-27') === '2026-27'
+    );
+
+    if (seasonMatches.length === 0) {
+      // Tidak ada data musim aktif: tetap aman di Pekan 1.
+      hasInitializedCurrentWeek.current = true;
+      setSelectedPekan('1');
+      return;
+    }
+
+    const getWeekNumber = (match: any): number | null => {
+      const value = match.week ?? match.pekan;
+      const week = Number(value);
+
+      if (!Number.isFinite(week)) return null;
+      if (week < 1 || week > 34) return null;
+
+      return week;
+    };
+
+    // upcoming_matches berisi pertandingan yang sedang/akan dimainkan.
+    // Pekan aktif = pekan terkecil yang masih memiliki pertandingan
+    // belum selesai. Ini membuat sistem otomatis:
+    // Pekan 1 -> Pekan 2 -> ... -> Pekan 34.
+    const activeWeeks = seasonMatches
+      .filter((match: any) => String(match.status || '').toLowerCase() !== 'finished')
+      .map(getWeekNumber)
+      .filter((week): week is number => week !== null);
+
+    let currentWeek: number;
+
+    if (activeWeeks.length > 0) {
+      currentWeek = Math.min(...activeWeeks);
+    } else {
+      // Fallback jika seluruh pertandingan yang dikembalikan API sudah selesai.
+      const allWeeks = seasonMatches
+        .map(getWeekNumber)
+        .filter((week): week is number => week !== null);
+
+      currentWeek = allWeeks.length > 0 ? Math.max(...allWeeks) : 1;
+    }
+
+    hasInitializedCurrentWeek.current = true;
+    setSelectedPekan(String(currentWeek));
+  }, [upcomingMatches]);
 
   const handleNavClick = (path: string) => {
     if (path === '/reports') {
@@ -905,7 +1223,7 @@ export default function App() {
           <Link to="/" className="flex items-center gap-2.5 shrink-0 cursor-pointer group" onClick={() => handleNavClick('/')}>
             <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
               <img 
-                src="public/favicon.png" 
+                src="favicon.png" 
                 alt="Logo Sibundar" 
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" 
               />
@@ -1085,17 +1403,20 @@ export default function App() {
             
             <div className="lg:col-span-2 space-y-4">
               <Link to="/" className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNavClick('/')}>
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full bg-[#0B1220] rounded-[14px] flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-orange-400" />
-                  </div>
+                <div className="w-10 h-10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+                  <img
+                    src="favicon.png"
+                    alt="Logo Sibundar"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-black text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">Sibundar</span>
-                    <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">PRO</span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-medium">Football Tactical Intelligence</p>
+                  <span className="font-black text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">
+                    Sibundar
+                  </span>
+                  <p className="text-xs text-slate-400 font-medium">
+                    Football Tactical Intelligence
+                  </p>
                 </div>
               </Link>
 

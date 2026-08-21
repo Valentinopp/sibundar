@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { Flame, Play, Zap, Activity, Shield, Users, FileText, BarChart3, Award, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { Flame, Play, Zap, Activity, Shield, Users, FileText, Award, ChevronRight } from 'lucide-react';
 
 interface UpcomingMatch {
   [key: string]: any;
@@ -9,7 +9,6 @@ interface DashboardViewProps {
   t: any;
   handleNavClick: (navId: string) => void;
   openServiceModal: (serviceType: string) => void;
-  setIsCompareModalOpen: (open: boolean) => void;
   isLoadingMatches: boolean;
   apiError: string | null;
   upcomingMatches: UpcomingMatch[];
@@ -29,7 +28,6 @@ export default function DashboardView({
   t,
   handleNavClick,
   openServiceModal,
-  setIsCompareModalOpen,
   isLoadingMatches,
   apiError,
   upcomingMatches,
@@ -59,7 +57,7 @@ export default function DashboardView({
             <path d="M 70 105 A 35 35 0 0 1 70 155" />
             <rect x="330" y="60" width="60" height="140" />
             <rect x="370" y="95" width="20" height="70" />
-            <path d="M 330 105 A 35 35 0 0 2 330 155" />
+            <path d="M 330 105 A 35 35 0 0 1 330 155" />
           </svg>
         </div>
 
@@ -133,88 +131,6 @@ export default function DashboardView({
       {/* Dashboard Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
         <div className="lg:col-span-2 space-y-5 lg:space-y-6">
-          {/* Featured Live Match Telemetry */}
-          <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#111827] to-slate-900 border border-white/[0.08] p-4 sm:p-6 relative overflow-hidden shadow-2xl hover:border-orange-500/30 transition-all duration-300 group">
-            <div className="flex items-center justify-between pb-3 sm:pb-4 mb-3 sm:mb-4 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-                <span className="text-[10px] sm:text-xs font-extrabold tracking-wider text-red-400 uppercase">{t.featuredMatch.badge}</span>
-              </div>
-              <div className="text-[10px] sm:text-xs text-slate-400 font-medium truncate max-w-[180px] sm:max-w-none">{t.featuredMatch.stadium}</div>
-            </div>
-
-            <div className="grid grid-cols-3 items-center py-2 sm:py-4">
-              <div className="flex flex-col items-center text-center space-y-1.5 sm:space-y-2 group-hover:scale-105 transition-transform duration-300">
-                <TeamBadge name="Persib Bandung" size="lg" />
-                <div>
-                  <h3 className="font-bold text-white text-xs sm:text-base">Persib Bandung</h3>
-                  <p className="text-[10px] sm:text-xs text-slate-400">{t.featuredMatch.homeRank}</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-2xl sm:text-5xl font-black text-white tracking-tight">2</span>
-                  <span className="text-lg sm:text-2xl font-bold text-slate-600 animate-pulse">:</span>
-                  <span className="text-2xl sm:text-5xl font-black text-white tracking-tight">1</span>
-                </div>
-                <div className="mt-1.5 sm:mt-2 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-orange-500/10 text-orange-400 text-[10px] sm:text-xs font-semibold border border-orange-500/20 shadow-inner">
-                  xG: 2.14 - 1.08
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center text-center space-y-1.5 sm:space-y-2 group-hover:scale-105 transition-transform duration-300">
-                <TeamBadge name="Persija Jakarta" size="lg" />
-                <div>
-                  <h3 className="font-bold text-white text-xs sm:text-base">Persija Jakarta</h3>
-                  <p className="text-[10px] sm:text-xs text-slate-400">{t.featuredMatch.awayRank}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 sm:mt-6 pt-4 border-t border-white/[0.06] space-y-3">
-              <div className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.featuredMatch.liveTelemetry}</div>
-
-              <div>
-                <div className="flex justify-between text-xs text-slate-300 font-medium mb-1">
-                  <span>56%</span>
-                  <span className="text-slate-400 text-[10px] sm:text-[11px]">{t.featuredMatch.possession}</span>
-                  <span>44%</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden flex">
-                  <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-700 ease-out" style={{ width: '56%' }} />
-                  <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-700 ease-out" style={{ width: '44%' }} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 pt-1 text-center text-xs">
-                <div className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/10 transition-colors">
-                  <div className="text-slate-400 text-[9px] sm:text-[10px]">{t.featuredMatch.passAccuracy}</div>
-                  <div className="font-extrabold text-white text-xs sm:text-sm mt-0.5">84% vs 79%</div>
-                </div>
-                <div className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/10 transition-colors">
-                  <div className="text-slate-400 text-[9px] sm:text-[10px]">{t.featuredMatch.corners}</div>
-                  <div className="font-extrabold text-white text-xs sm:text-sm mt-0.5">6 vs 3</div>
-                </div>
-                <div className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/10 transition-colors">
-                  <div className="text-slate-400 text-[9px] sm:text-[10px]">{t.featuredMatch.yellowCards}</div>
-                  <div className="font-extrabold text-amber-400 text-xs sm:text-sm mt-0.5">2 vs 4</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 sm:mt-5">
-              <button 
-                onClick={() => setIsCompareModalOpen(true)}
-                className="w-full py-2.5 sm:py-3 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-extrabold text-xs transition-all duration-300 shadow-lg shadow-orange-500/20 active:scale-98 flex items-center justify-center gap-2 cursor-pointer hover:shadow-orange-500/30"
-              >
-                <BarChart3 className="w-4 h-4 text-slate-950" />
-                <span>{t.featuredMatch.openDashboard}</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </button>
-            </div>
-          </div>
-
           {/* Upcoming Matches Grid */}
           <div>
             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -380,82 +296,63 @@ export default function DashboardView({
 
         {/* Right Column */}
         <div className="space-y-5 lg:space-y-6">
-          {/* Top Players Spotlight */}
+          {/* Top Players - Coming Soon */}
           <div className="rounded-2xl sm:rounded-3xl bg-[#111827]/90 border border-white/[0.07] p-4 sm:p-5 shadow-2xl">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
-                <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">{t.topPlayers.title}</h2>
-                <p className="text-[10px] sm:text-xs text-slate-400">{t.topPlayers.subtitle}</p>
+                <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                  Top Player
+                </h2>
+                <p className="text-[10px] sm:text-xs text-slate-400">
+                  Pemain terbaik Liga 1
+                </p>
               </div>
-              <Award className="w-4 h-4 text-orange-400 shrink-0 animate-bounce" />
+
+              <Award className="w-4 h-4 text-orange-400 shrink-0" />
             </div>
 
-            <div className="space-y-2.5">
-              {TOP_PLAYERS.map((player) => (
-                <div key={player.id} className="p-2.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-orange-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between group">
-                  <div className="flex items-center gap-2.5">
-                    <img src={player.avatar} alt={player.name} className="w-9 h-9 rounded-xl object-cover border border-white/10 shrink-0 group-hover:border-orange-400 transition-colors" />
-                    <div>
-                      <div className="text-xs font-bold text-white group-hover:text-orange-400 transition-colors">{player.name}</div>
-                      <div className="text-[10px] text-slate-400">{player.team} • {player.position}</div>
-                    </div>
-                  </div>
+            <div className="min-h-[220px] flex flex-col items-center justify-center text-center rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-3">
+                <Award className="w-6 h-6 text-orange-400" />
+              </div>
 
-                  <div className="text-right">
-                    <div className="text-xs font-extrabold text-orange-400">{player.goals} {t.topPlayers.goals}</div>
-                    <div className="text-[10px] text-slate-400">{player.assists} {t.topPlayers.assists} • <span className="text-amber-400 font-bold">{player.rating} ★</span></div>
-                  </div>
-                </div>
-              ))}
+              <h3 className="text-sm font-bold text-white">
+                Coming Soon
+              </h3>
+
+              <p className="mt-1 max-w-[220px] text-[10px] sm:text-xs text-slate-400 leading-relaxed">
+                Fitur ranking pemain terbaik akan segera tersedia.
+              </p>
             </div>
           </div>
 
-          {/* Tactical Articles Section */}
+          {/* Tactical Articles - Coming Soon */}
           <div className="rounded-2xl sm:rounded-3xl bg-[#111827]/90 border border-white/[0.07] p-4 sm:p-5 shadow-2xl">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
-                <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">{t.recentAnalysis.title}</h2>
-                <p className="text-[10px] sm:text-xs text-slate-400">{t.recentAnalysis.subtitle}</p>
+                <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                  Laporan Taktis
+                </h2>
+                <p className="text-[10px] sm:text-xs text-slate-400">
+                  Analisis taktis & laporan pertandingan
+                </p>
               </div>
-              <button 
-                onClick={() => handleNavClick('reports')}
-                className="text-[10px] sm:text-xs font-semibold text-orange-400 hover:underline flex items-center gap-0.5 cursor-pointer group"
-              >
-                <span>Lihat Semua</span>
-                <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </button>
+
+              <FileText className="w-4 h-4 text-orange-400 shrink-0" />
             </div>
 
-            <div className="space-y-3">
-              {TACTICAL_ARTICLES.slice(0, 3).map((article) => (
-                <div 
-                  key={article.id} 
-                  onClick={() => handleArticleClick(article)}
-                  className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-orange-500/40 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${article.badgeColor}`}>
-                      {article.category}
-                    </span>
-                    <span className="text-[9px] text-slate-400 font-medium">{article.readTime}</span>
-                  </div>
+            <div className="min-h-[220px] flex flex-col items-center justify-center text-center rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-3">
+                <FileText className="w-6 h-6 text-orange-400" />
+              </div>
 
-                  <h3 className="text-xs font-bold text-white group-hover:text-orange-400 transition-colors leading-snug">
-                    {article.title}
-                  </h3>
+              <h3 className="text-sm font-bold text-white">
+                Coming Soon
+              </h3>
 
-                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                    {article.summary}
-                  </p>
-
-                  <div className="pt-1.5 border-t border-white/[0.04] flex items-center justify-between text-[10px]">
-                    <span className="text-slate-400 font-medium">{article.author} • {article.date}</span>
-                    <span className="text-orange-400 font-bold flex items-center gap-0.5 group-hover:translate-x-1 transition-transform">
-                      Baca Artikel <ChevronRight className="w-3 h-3" />
-                    </span>
-                  </div>
-                </div>
-              ))}
+              <p className="mt-1 max-w-[220px] text-[10px] sm:text-xs text-slate-400 leading-relaxed">
+                Laporan dan analisis taktis mendalam akan segera tersedia.
+              </p>
             </div>
           </div>
         </div>
