@@ -46,15 +46,11 @@ const prepareApiHtml = (rawHtml: string): string => {
   // filters and any other interactions continue to work exactly as on the API.
   //
   // Remove only dangerous embedded elements / inline event attributes.
+  // Jangan menghapus atribut event milik HTML API.
+  // Filter seperti "Semua", "Match Preview", "Match Report", "Transfer",
+  // "Club News", dan "League News" dapat menggunakan onclick/onchange
+  // atau handler DOM milik halaman API.
   doc.querySelectorAll('iframe, object, embed').forEach((el) => el.remove());
-
-  doc.querySelectorAll('*').forEach((el) => {
-    Array.from(el.attributes).forEach((attr) => {
-      if (attr.name.toLowerCase().startsWith('on')) {
-        el.removeAttribute(attr.name);
-      }
-    });
-  });
 
   const head = doc.head;
   const base = doc.createElement('base');
@@ -75,6 +71,15 @@ const prepareApiHtml = (rawHtml: string): string => {
       min-height: 0 !important;
       height: auto !important;
       margin-bottom: 0 !important;
+    }
+
+    /* Pastikan seluruh kontrol API tetap bisa diklik. */
+    button,
+    a,
+    [role="button"],
+    input,
+    select {
+      pointer-events: auto !important;
     }
   `;
   doc.head.appendChild(resetStyle);
@@ -241,10 +246,17 @@ export default function ReportsView(_props: ReportsViewProps) {
     const handleApiMessage = (event: MessageEvent) => {
       if (!event.data || event.data.type !== 'sibundar-api-height') return;
 
+      const source = event.source as Window | null;
+      const iframe = document.querySelector(
+        'iframe[title="Sibundar Tactical Reports"]'
+      ) as HTMLIFrameElement | null;
+
+      if (iframe && source && iframe.contentWindow !== source) return;
+
       const height = Number(event.data.height);
       if (!Number.isFinite(height) || height < 200) return;
 
-      setIframeHeight(Math.min(Math.max(height + 8, 500), 20000));
+      setIframeHeight(Math.min(Math.max(Math.ceil(height) + 8, 300), 20000));
     };
 
     window.addEventListener('message', handleApiMessage);
