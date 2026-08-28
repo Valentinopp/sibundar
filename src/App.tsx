@@ -29,7 +29,6 @@ import StatisticsView from './components/StatisticsView';
 import TeamsView from './components/TeamsView';
 import PlayersView from './components/PlayersView';
 import ServicesView from './components/ServicesView';
-import ReportsView from './components/ReportsView';
 
 const FacebookIcon = (props: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={props.className || "w-4 h-4"}>
@@ -74,38 +73,38 @@ const TRANSLATIONS: Record<string, any> = {
       settings: 'Pengaturan',
     },
     header: {
-      searchPlaceholder: 'Cari tim, pemain, xG...',
-      league: 'BRI Liga 1',
+      searchPlaceholder: 'Cari tim, pemain, statistik...',
+      league: 'Sepak Bola Indonesia',
     },
     hero: {
-      badge: 'Pusat Intelijen Taktis Liga 1 Indonesia',
+      badge: 'Pusat Analisis Sepak Bola Indonesia',
       titleStart: 'Selamat Datang di ',
       titleEnd: ' Analisis Sepak Bola',
-      subtitle: 'Statistik sepak bola profesional, telemetri video taktis, dan rincian expected goals (xG) untuk setiap laga BRI Liga 1 Indonesia.',
-      exploreMatches: 'Jelajahi Histori Laga',
-      requestAnalysis: 'Minta Analisis Kustom',
+      subtitle: 'Statistik pertandingan, analisis taktik, dan informasi performa tim serta pemain di sepak bola Indonesia.',
+      exploreMatches: 'Lihat Riwayat Pertandingan',
+      requestAnalysis: 'Minta Analisis Pertandingan',
     },
     stats: {
-      totalMatches: 'Total Laga Dianalisis',
+      totalMatches: 'Total Pertandingan Dianalisis',
       thisSeason: 'Musim Ini',
-      activeClubs: 'Klub Liga 1 Aktif',
+      activeClubs: 'Klub Sepak Bola Indonesia',
       fullCoverage: 'Cakupan Penuh',
-      playersTracked: 'Pemain Terdata',
-      scoutingDatabase: 'Basis Data Scouting',
+      playersTracked: 'Pemain Terdaftar',
+      scoutingDatabase: 'Data Pemain & Tim',
       analysisRequests: 'Permintaan Analisis',
-      funAndClubs: 'Fun Football & Klub',
+      funAndClubs: 'Komunitas & Klub',
     },
     upcoming: {
       title: 'Jadwal Pertandingan Mendatang',
-      subtitle: 'Jadwal Pekan ke-19 BRI Liga 1',
+      subtitle: 'Jadwal Pertandingan Sepak Bola Indonesia',
       viewAll: 'Lihat Semua Jadwal',
       derby: 'DERBY',
       viewStats: 'Lihat Statistik',
     },
     standings: {
-      title: 'Tabel Klasemen Liga 1',
-      subtitle: 'Klasemen lengkap 34 pekan & panduan performa',
-      matchday: '34 PEKAN',
+      title: 'Tabel Klasemen Sepak Bola Indonesia',
+      subtitle: 'Klasemen lengkap dan performa tim sepanjang musim',
+      matchday: '',
       pos: 'Pos',
       club: 'Klub',
       mp: 'M',
@@ -120,104 +119,104 @@ const TRANSLATIONS: Record<string, any> = {
       relegation: 'Degradasi',
     },
     topPlayers: {
-      title: 'Sorotan Pemain Terbaik',
-      subtitle: 'Pemain terbaik Liga 1 berdasarkan rating xG',
+      title: 'Pemain Terbaik',
+      subtitle: 'Pemain dengan performa terbaik di sepak bola Indonesia',
       goals: 'Gol',
       assists: 'Assist',
     },
     recentAnalysis: {
       title: 'Artikel Taktis Terkini',
-      subtitle: 'Ulasan taktis & analisis artikel mendalam',
+      subtitle: 'Ulasan pertandingan dan pembahasan taktik secara mendalam',
       readArticle: 'Baca Artikel',
     },
     services: {
-      heading: 'Paket Laporan Pertandingan (Match Report)',
-      subheading: 'Pilih paket analisis taktis sesuai kebutuhan tim atau komunitas Anda',
-      pkg1Title: 'Basic Report',
+      heading: 'Paket Laporan Pertandingan',
+      subheading: 'Pilih paket laporan sesuai kebutuhan tim atau komunitas Anda',
+      pkg1Title: 'Laporan Dasar',
       pkg1Price: 'Rp 50.000',
       pkg1Features: [
         'Statistik Dasar (Penguasaan, Tembakan, Umpan)',
         'Formasi & Susunan Pemain',
         'Skor Akhir & Ringkasan Laga Singkat'
       ],
-      pkg2Title: 'Pro Tactical',
+      pkg2Title: 'Analisis Taktis',
       pkg2Price: 'Rp 200.000',
       pkg2Features: [
-        'Semua fitur Basic Report',
-        'Data Expected Goals (xG)',
-        'Heatmap Pergerakan Pemain',
-        'Rating Individu Pemain',
-        'Peta Jaringan Umpan (Pass Network)'
+        'Semua fitur Laporan Dasar',
+        'Statistik Serangan & Peluang',
+        'Peta Pergerakan Pemain',
+        'Penilaian Performa Pemain',
+        'Peta Aliran Umpan'
       ],
-      pkg3Title: 'Elite Scouting',
+      pkg3Title: 'Scouting Lengkap',
       pkg3Price: 'Rp 500.000',
       pkg3Features: [
-        'Semua fitur Pro Tactical',
-        'Full Video Telemetry & Klip Sorotan',
-        'Analisis PPDA & Zona Pressing',
-        'Ekspor Raw Data (Excel/CSV)',
-        'Sesi Konsultasi Analis'
+        'Semua fitur Analisis Taktis',
+        'Analisis Video & Klip Sorotan',
+        'Analisis PPDA & Area Pressing',
+        'Ekspor Data (Excel/CSV)',
+        'Sesi Konsultasi dengan Analis'
       ],
-      btnText: 'Pesan Paket Ini'
+      btnText: 'Pilih Paket Ini'
     },
     quickActions: {
-      title: 'Aksi Taktis Cepat',
-      subtitle: 'Percepat alur kerja scouting dan pemantauan Anda',
+      title: 'Aksi Cepat',
+      subtitle: 'Pantau pertandingan dan lakukan analisis dengan lebih cepat',
       newAnalysis: 'Analisis Baru',
       compareTeams: 'Bandingkan Tim',
     },
     footer: {
       aboutTitle: 'Tentang Sibundar',
-      aboutText: 'Platform intelijen taktis & analitik data sepak bola nomor #1 di Indonesia. Menyajikan telemetri xG mendalam, peta pergerakan, serta laporan performa profesional untuk klub, pelatih, dan komunitas.',
+      aboutText: 'Platform analisis sepak bola yang membantu Anda memahami pertandingan melalui data, statistik, dan pembahasan taktik untuk klub, pelatih, pemain, dan komunitas.',
       officeTitle: 'Kantor Pusat Surabaya',
-      addressLine1: 'Gedung Sibundar Intelligence Tower, Lt. 8',
+      addressLine1: 'Gedung Sibundar Intelligence Tower, Lantai 8',
       addressLine2: 'Jl. Mayjen Sungkono No. 178, Sawahan',
       addressCity: 'Kota Surabaya, Jawa Timur 60225',
       contactTitle: 'Hubungi Kami',
       phone: '+62 (031) 8901-2345',
       whatsapp: '+62 856-4507-5646',
       email: 'scouting@sibundar.id',
-      quickLinks: 'Navigasi Cepat',
+      quickLinks: 'Tautan Cepat',
       servicesTitle: 'Layanan & Paket',
-      socialTitle: 'Koneksi Media Sosial',
+      socialTitle: 'Media Sosial',
       copyright: '© 2026 Sibundar Football Analytics. Hak Cipta Dilindungi.',
-      developedIn: 'Dikembangkan di Surabaya dengan semangat untuk kemajuan sepak bola Indonesia.'
+      developedIn: 'Dikembangkan di Surabaya untuk mendukung kemajuan sepak bola Indonesia.'
     },
     modalAnalysis: {
-      title: 'Ajukan Pembuatan Match Report',
-      subtitle: 'Layanan Analisis Pertandingan Kustom Sibundar',
-      serviceType: 'Pilih Paket Layanan',
-      option1: 'Basic Report (Rp 50.000)',
-      option2: 'Pro Tactical (Rp 200.000)',
-      option3: 'Elite Scouting (Rp 500.000)',
-      matchName: 'Nama Pertandingan atau Klub',
+      title: 'Ajukan Laporan Pertandingan',
+      subtitle: 'Layanan analisis pertandingan Sibundar',
+      serviceType: 'Pilih Paket',
+      option1: 'Laporan Dasar (Rp 50.000)',
+      option2: 'Analisis Taktis (Rp 200.000)',
+      option3: 'Scouting Lengkap (Rp 500.000)',
+      matchName: 'Nama Pertandingan atau Tim',
       matchNamePlaceholder: 'Contoh: Persib Bandung vs Persebaya atau Komunitas FC Jakarta',
-      focus: 'Catatan Tambahan / Fokus Spesifik (Opsional)',
-      focusPlaceholder: 'Tentukan kebutuhan: Pemicu pressing, analisis bola mati (set-piece), dll...',
+      focus: 'Catatan atau Fokus Analisis (Opsional)',
+      focusPlaceholder: 'Contoh: pressing, bola mati, pertahanan, serangan balik, atau hal lain yang ingin dianalisis.',
       cancel: 'Batal',
       submit: 'Kirim Permintaan',
-      successMsg: 'Permintaan report berhasil dikirim! Tim taktis kami akan menghubungi Anda segera.',
+      successMsg: 'Permintaan berhasil dikirim! Tim kami akan menghubungi Anda segera.',
     },
     modalCompare: {
-      title: 'Telemetri Laga & Perbandingan Tim',
-      subtitle: 'Rincian Head-to-Head & Expected Goals (xG)',
-      tabStats: 'Statistik Telemetri',
-      tabTimeline: 'Linimasa xG & Acara',
+      title: 'Statistik Pertandingan & Perbandingan Tim',
+      subtitle: 'Perbandingan statistik dan riwayat pertemuan kedua tim',
+      tabStats: 'Statistik Pertandingan',
+      tabTimeline: 'Jalannya Pertandingan',
       tabLineup: 'Susunan Pemain & Rating',
-      xg: 'Expected Goals (xG)',
-      fieldTilt: 'Field Tilt (Penguasaan Sepertiga Akhir)',
-      ppda: 'PPDA (Umpan per Aksi Bertahan)',
+      xg: 'Tembakan',
+      fieldTilt: 'Penguasaan Bola',
+      ppda: 'Intensitas Pressing',
       counterAttacks: 'Serangan Balik',
       boxEntries: 'Penetrasi Kotak Penalti',
-      close: 'Tutup Telemetri',
+      close: 'Tutup',
     },
     h2hModal: {
-      title: 'Hasil Head to Head (H2H)',
-      subtitle: 'Rekam jejak pertemuan terdahulu & statistik hasil laga',
+      title: 'Riwayat Pertemuan',
+      subtitle: 'Hasil dan catatan pertemuan kedua tim',
       wins: 'Menang',
       draws: 'Seri',
       recentEncounters: '5 Pertemuan Terakhir',
-      close: 'Tutup Statistik',
+      close: 'Tutup',
     }
   },
   en: {
@@ -233,20 +232,20 @@ const TRANSLATIONS: Record<string, any> = {
     },
     header: {
       searchPlaceholder: 'Search teams, players, xG...',
-      league: 'BRI Liga 1',
+      league: 'Sepak Bola Indonesia',
     },
     hero: {
-      badge: 'Liga 1 Indonesia Tactical Intelligence Center',
+      badge: 'Indonesian Football Tactical Intelligence Center',
       titleStart: 'Welcome to ',
       titleEnd: ' Football Analytics',
-      subtitle: 'Professional football statistics, tactical video telemetry, and expected goals (xG) breakdowns for every BRI Liga 1 Indonesia match.',
+      subtitle: 'Professional football statistics, tactical video telemetry, and match peluang breakdowns across Indonesian football.',
       exploreMatches: 'Explore Match History',
       requestAnalysis: 'Request Custom Analysis',
     },
     stats: {
       totalMatches: 'Total Analyzed Matches',
       thisSeason: 'This Season',
-      activeClubs: 'Active Liga 1 Clubs',
+      activeClubs: 'Active Indonesian Football Clubs',
       fullCoverage: 'Full Coverage',
       playersTracked: 'Tracked Players',
       scoutingDatabase: 'Scouting Database',
@@ -255,15 +254,15 @@ const TRANSLATIONS: Record<string, any> = {
     },
     upcoming: {
       title: 'Upcoming Matches',
-      subtitle: 'BRI Liga 1 Matchday 19 Schedule',
+      subtitle: 'Upcoming Indonesian Football Match Schedule',
       viewAll: 'View Full Schedule',
       derby: 'DERBY',
       viewStats: 'View Statistics',
     },
     standings: {
-      title: 'Liga 1 Standings Table',
-      subtitle: 'Full 34-matchday standings & performance form guide',
-      matchday: '34 MATCHDAYS',
+      title: 'Indonesian Football Standings',
+      subtitle: 'Full standings & performance form guide',
+      matchday: '',
       pos: 'Pos',
       club: 'Club',
       mp: 'MP',
@@ -279,7 +278,7 @@ const TRANSLATIONS: Record<string, any> = {
     },
     topPlayers: {
       title: 'Top Player Spotlight',
-      subtitle: 'Best Liga 1 players ranked by xG rating',
+      subtitle: 'Best Indonesian football players ranked by xG rating',
       goals: 'Goals',
       assists: 'Assists',
     },
@@ -291,26 +290,26 @@ const TRANSLATIONS: Record<string, any> = {
     services: {
       heading: 'Match Report Packages',
       subheading: 'Choose the tactical analysis package that fits your team or community needs',
-      pkg1Title: 'Basic Report',
+      pkg1Title: 'Laporan Dasar',
       pkg1Price: 'Rp 50,000',
       pkg1Features: [
         'Basic Stats (Possession, Shots, Pass Accuracy)',
         'Formations & Lineups',
         'Final Score & Short Match Summary'
       ],
-      pkg2Title: 'Pro Tactical',
+      pkg2Title: 'Analisis Taktis',
       pkg2Price: 'Rp 200,000',
       pkg2Features: [
-        'All Basic Report features',
-        'Expected Goals (xG) Data',
+        'All Laporan Dasar features',
+        'Tembakan Data',
         'Player Movement Heatmaps',
         'Individual Player Ratings',
         'Pass Network Maps'
       ],
-      pkg3Title: 'Elite Scouting',
+      pkg3Title: 'Scouting Lengkap',
       pkg3Price: 'Rp 500,000',
       pkg3Features: [
-        'All Pro Tactical features',
+        'All Analisis Taktis features',
         'Full Video Telemetry & Highlight Clips',
         'PPDA & Pressing Zone Analysis',
         'Raw Data Export (Excel/CSV)',
@@ -345,24 +344,24 @@ const TRANSLATIONS: Record<string, any> = {
       title: 'Submit Match Report Request',
       subtitle: 'Sibundar Custom Match Analysis Services',
       serviceType: 'Select Service Package',
-      option1: 'Basic Report (Rp 50k)',
-      option2: 'Pro Tactical (Rp 200k)',
-      option3: 'Elite Scouting (Rp 500k)',
+      option1: 'Laporan Dasar (Rp 50k)',
+      option2: 'Analisis Taktis (Rp 200k)',
+      option3: 'Scouting Lengkap (Rp 500k)',
       matchName: 'Match Name or Club',
       matchNamePlaceholder: 'Example: Persib Bandung vs Persebaya or Community FC Jakarta',
       focus: 'Additional Notes / Specific Focus (Optional)',
-      focusPlaceholder: 'Specify needs: Pressing triggers, set-piece analysis, etc...',
+      focusPlaceholder: 'Specify needs: Pressing triggers, bola mati analysis, etc...',
       cancel: 'Cancel',
       submit: 'Submit Request',
       successMsg: 'Report request sent successfully! Our tactical team will contact you shortly.',
     },
     modalCompare: {
       title: 'Match Telemetry & Team Comparison',
-      subtitle: 'Head-to-Head Breakdown & Expected Goals (xG)',
+      subtitle: 'Head-to-Head Breakdown & Tembakan',
       tabStats: 'Telemetry Stats',
       tabTimeline: 'xG Timeline & Events',
       tabLineup: 'Lineup & Player Ratings',
-      xg: 'Expected Goals (xG)',
+      xg: 'Tembakan',
       fieldTilt: 'Field Tilt (Final Third Possession)',
       ppda: 'PPDA (Passes Per Defensive Action)',
       counterAttacks: 'Counter Attacks',
@@ -381,24 +380,225 @@ const TRANSLATIONS: Record<string, any> = {
 };
 
 const TEAM_INFO: Record<string, any> = {
-  'Persib Bandung': { logo: '/logos/persib.svg', bg: 'from-blue-600 to-blue-900', text: 'PERSIB', border: 'border-blue-400/30', city: 'Bandung', stadium: 'Gelora Bandung Lautan Api', coach: 'Bojan Hodak' },
-  'Borneo FC': { logo: '/logos/borneo.svg', bg: 'from-amber-500 to-orange-700', text: 'BORNEO', border: 'border-amber-400/30', city: 'Samarinda', stadium: 'Segiri', coach: 'Pieter Huistra' },
-  'Persija Jakarta': { logo: '/logos/persija.svg', bg: 'from-orange-600 to-red-700', text: 'PERSIJA', border: 'border-orange-400/30', city: 'Jakarta', stadium: 'GBK / JIS', coach: 'Carlos Peña' },
-  'Persebaya Surabaya': { logo: '/logos/persebaya.svg', bg: 'from-emerald-600 to-green-800', text: 'PERSEBAYA', border: 'border-emerald-400/30', city: 'Surabaya', stadium: 'Gelora Bung Tomo', coach: 'Paul Munster' },
-  'PSM Makassar': { logo: '/logos/psm.svg', bg: 'from-red-600 to-red-900', text: 'PSM', border: 'border-red-400/30', city: 'Makassar', stadium: 'Gelora B.J. Habibie', coach: 'Bernardo Tavares' },
-  'Bhayangkara FC': { logo: '/logos/bhayangkara.svg', bg: 'from-amber-600 to-yellow-800', text: 'BHAYANGKARA', border: 'border-amber-400/30', city: 'Jakarta', stadium: 'STIK Stadium', coach: 'Gomes de Oliveira' },
-  'Malut United': { logo: '/logos/malut.svg', bg: 'from-red-700 to-blue-900', text: 'MALUT', border: 'border-red-400/30', city: 'Ternate', stadium: 'Gelora Kie Raha', coach: 'Imran Nahumarury' },
-  'Dewa United': { logo: '/logos/dewa.svg', bg: 'from-amber-500 to-yellow-700', text: 'DEWA', border: 'border-amber-400/30', city: 'Tangerang', stadium: 'Indomilk Arena', coach: 'Jan Olde Riekerink' },
-  'Bali United': { logo: '/logos/bali_united.svg', bg: 'from-red-600 to-slate-900', text: 'BALI', border: 'border-red-400/30', city: 'Gianyar', stadium: 'Kapten I Wayan Dipta', coach: 'Stefano Cugurra' },
-  'Arema FC': { logo: '/logos/arema.svg', bg: 'from-blue-700 to-indigo-950', text: 'AREMA', border: 'border-blue-400/30', city: 'Malang', stadium: 'Kanjuruhan', coach: 'Joel Cornelli' },
-  'Persik Kediri': { logo: '/logos/persik.svg', bg: 'from-purple-800 to-fuchsia-950', text: 'PERSIK', border: 'border-purple-400/30', city: 'Kediri', stadium: 'Brawijaya', coach: 'Marcelo Rospide' },
-  'Persita Tangerang': { logo: '/logos/persita.svg', bg: 'from-purple-700 to-indigo-900', text: 'PERSITA', border: 'border-purple-400/30', city: 'Tangerang', stadium: 'Indomilk Arena', coach: 'Fabio Lefundes' },
-  'Persis Solo': { logo: '/logos/persis.svg', bg: 'from-red-600 to-rose-900', text: 'PERSIS', border: 'border-red-400/30', city: 'Surakarta', stadium: 'Manahan', coach: 'Milomir Seslija' },
-  'Barito Putera': { logo: '/logos/barito.svg', bg: 'from-yellow-500 to-blue-800', text: 'BARITO', border: 'border-yellow-400/30', city: 'Banjarmasin', stadium: 'Demang Lehman', coach: 'Rahmad Darmawan' },
-  'PSIS Semarang': { logo: '/logos/psis.svg', bg: 'from-blue-600 to-indigo-900', text: 'PSIS', border: 'border-blue-400/30', city: 'Semarang', stadium: 'Jatidiri', coach: 'Gilbert Agius' },
-  'Madura United': { logo: '/logos/madura.svg', bg: 'from-red-600 to-slate-900', text: 'MADURA', border: 'border-red-400/30', city: 'Pamekasan', stadium: 'Gelora Ratu Sungkeman', coach: 'Paulo Menezes' },
-  'PSS Sleman': { logo: '/logos/pss.svg', bg: 'from-emerald-700 to-teal-950', text: 'PSS', border: 'border-emerald-400/30', city: 'Sleman', stadium: 'Maguwoharjo', coach: 'Mazola Junior' },
-  'Semen Padang': { logo: '/logos/semen.svg', bg: 'from-red-700 to-slate-900', text: 'SEMEN', border: 'border-red-400/30', city: 'Padang', stadium: 'Haji Agus Salim', coach: 'Eduardo Almeida' },
+  'Persib Bandung': {
+    logo: '/logos/persib.svg',
+    bg: 'from-blue-600 to-blue-900',
+    text: 'PERSIB',
+    border: 'border-blue-400/30',
+    city: 'Bandung',
+    stadium: 'Gelora Bandung Lautan Api',
+    coach: 'Bojan Hodak',
+  },
+  'Borneo FC': {
+    logo: '/logos/borneo.svg',
+    bg: 'from-amber-500 to-orange-700',
+    text: 'BORNEO',
+    border: 'border-amber-400/30',
+    city: 'Samarinda',
+    stadium: 'Segiri',
+    coach: 'Pieter Huistra',
+  },
+  'Persija Jakarta': {
+    logo: '/logos/persija.svg',
+    bg: 'from-orange-600 to-red-700',
+    text: 'PERSIJA',
+    border: 'border-orange-400/30',
+    city: 'Jakarta',
+    stadium: 'GBK / JIS',
+    coach: 'Carlos Peña',
+  },
+  'Persebaya Surabaya': {
+    logo: '/logos/persebaya.svg',
+    bg: 'from-emerald-600 to-green-800',
+    text: 'PERSEBAYA',
+    border: 'border-emerald-400/30',
+    city: 'Surabaya',
+    stadium: 'Gelora Bung Tomo',
+    coach: 'Paul Munster',
+  },
+  'PSM Makassar': {
+    logo: '/logos/psm.svg',
+    bg: 'from-red-600 to-red-900',
+    text: 'PSM',
+    border: 'border-red-400/30',
+    city: 'Makassar',
+    stadium: 'Gelora B.J. Habibie',
+    coach: 'Bernardo Tavares',
+  },
+  'Bhayangkara FC': {
+    logo: '/logos/bhayangkara.svg',
+    bg: 'from-amber-600 to-yellow-800',
+    text: 'BHAYANGKARA',
+    border: 'border-amber-400/30',
+    city: 'Jakarta',
+    stadium: 'STIK Stadium',
+    coach: 'Gomes de Oliveira',
+  },
+  'Malut United': {
+    logo: '/logos/malut.svg',
+    bg: 'from-red-700 to-blue-900',
+    text: 'MALUT',
+    border: 'border-red-400/30',
+    city: 'Ternate',
+    stadium: 'Gelora Kie Raha',
+    coach: 'Imran Nahumarury',
+  },
+  'Dewa United': {
+    logo: '/logos/dewa.svg',
+    bg: 'from-amber-500 to-yellow-700',
+    text: 'DEWA',
+    border: 'border-amber-400/30',
+    city: 'Tangerang',
+    stadium: 'Indomilk Arena',
+    coach: 'Jan Olde Riekerink',
+  },
+  'Bali United': {
+    logo: '/logos/bali_united.svg',
+    bg: 'from-red-600 to-slate-900',
+    text: 'BALI',
+    border: 'border-red-400/30',
+    city: 'Gianyar',
+    stadium: 'Kapten I Wayan Dipta',
+    coach: 'Stefano Cugurra',
+  },
+  'Arema FC': {
+    logo: '/logos/arema.svg',
+    bg: 'from-blue-700 to-indigo-950',
+    text: 'AREMA',
+    border: 'border-blue-400/30',
+    city: 'Malang',
+    stadium: 'Kanjuruhan',
+    coach: 'Joel Cornelli',
+  },
+  'Persik Kediri': {
+    logo: '/logos/persik.svg',
+    bg: 'from-purple-800 to-fuchsia-950',
+    text: 'PERSIK',
+    border: 'border-purple-400/30',
+    city: 'Kediri',
+    stadium: 'Brawijaya',
+    coach: 'Marcelo Rospide',
+  },
+  'Persita Tangerang': {
+    logo: '/logos/persita.svg',
+    bg: 'from-purple-700 to-indigo-900',
+    text: 'PERSITA',
+    border: 'border-purple-400/30',
+    city: 'Tangerang',
+    stadium: 'Indomilk Arena',
+    coach: 'Fabio Lefundes',
+  },
+  'Persis Solo': {
+    logo: '/logos/persis.svg',
+    bg: 'from-red-600 to-rose-900',
+    text: 'PERSIS',
+    border: 'border-red-400/30',
+    city: 'Surakarta',
+    stadium: 'Manahan',
+    coach: 'Milomir Seslija',
+  },
+  'Barito Putera': {
+    logo: '',
+    bg: 'from-yellow-500 to-blue-800',
+    text: 'BARITO',
+    border: 'border-yellow-400/30',
+    city: 'Banjarmasin',
+    stadium: 'Demang Lehman',
+    coach: 'Rahmad Darmawan',
+  },
+  'PSIS Semarang': {
+    logo: '',
+    bg: 'from-blue-600 to-indigo-900',
+    text: 'PSIS',
+    border: 'border-blue-400/30',
+    city: 'Semarang',
+    stadium: 'Jatidiri',
+    coach: 'Gilbert Agius',
+  },
+  'Madura United': {
+    logo: '/logos/madura.svg',
+    bg: 'from-red-600 to-slate-900',
+    text: 'MADURA',
+    border: 'border-red-400/30',
+    city: 'Pamekasan',
+    stadium: 'Gelora Ratu Sungkeman',
+    coach: 'Paulo Menezes',
+  },
+  'PSS Sleman': {
+    logo: '/logos/pssSleman.svg',
+    bg: 'from-emerald-700 to-teal-950',
+    text: 'PSS',
+    border: 'border-emerald-400/30',
+    city: 'Sleman',
+    stadium: 'Maguwoharjo',
+    coach: 'Mazola Junior',
+  },
+
+  'Java United FC': {
+    logo: '/logos/java_united.svg',
+    bg: 'from-slate-700 to-slate-950',
+    text: 'JAV',
+    border: 'border-slate-400/30',
+    city: '',
+    stadium: '',
+    coach: '',
+  },
+
+  'Garudayaksa FC': {
+    logo: '/logos/garudayaksa.svg',
+    bg: 'from-red-700 to-slate-950',
+    text: 'GAR',
+    border: 'border-red-400/30',
+    city: '',
+    stadium: '',
+    coach: '',
+  },
+
+  'Isenmulang Kalteng FC': {
+    logo: '/logos/isenmulang.svg',
+    bg: 'from-emerald-700 to-slate-950',
+    text: 'ISE',
+    border: 'border-emerald-400/30',
+    city: '',
+    stadium: '',
+    coach: '',
+  },
+  'Semen Padang': {
+    logo: '/logos/semen.svg',
+    bg: 'from-red-700 to-slate-900',
+    text: 'SEMEN',
+    border: 'border-red-400/30',
+    city: 'Padang',
+    stadium: 'Haji Agus Salim',
+    coach: 'Eduardo Almeida',
+  },
+  'Persijap Jepara': {
+    logo: '/logos/persijap.svg',
+    bg: 'from-blue-700 to-slate-900',
+    text: 'PERSIJAP',
+    border: 'border-blue-400/30',
+    city: 'Jepara',
+    stadium: 'Gelora Bumi Kartini',
+    coach: '',
+  },
+  'PSIM Yogyakarta': {
+    logo: '/logos/psim.svg',
+    bg: 'from-blue-700 to-blue-950',
+    text: 'PSIM',
+    border: 'border-blue-400/30',
+    city: 'Yogyakarta',
+    stadium: '',
+    coach: '',
+  },
+  'PSBS Biak': {
+    logo: '/logos/psbs.svg',
+    bg: 'from-orange-600 to-red-900',
+    text: 'PSBS',
+    border: 'border-orange-400/30',
+    city: 'Biak',
+    stadium: '',
+    coach: '',
+  },
 };
 
 const H2H_DATA: Record<string, any> = {
@@ -407,11 +607,11 @@ const H2H_DATA: Record<string, any> = {
     draws: 1,
     awayWins: 1,
     history: [
-      { date: '27 Mar 2024', homeScore: 1, awayScore: 0, competition: 'BRI Liga 1' },
-      { date: '23 Sep 2023', homeScore: 3, awayScore: 1, competition: 'BRI Liga 1' },
-      { date: '11 Apr 2023', homeScore: 1, awayScore: 0, competition: 'BRI Liga 1' },
-      { date: '01 Okt 2022', homeScore: 3, awayScore: 2, competition: 'BRI Liga 1' },
-      { date: '23 Feb 2022', homeScore: 1, awayScore: 0, competition: 'BRI Liga 1' },
+      { date: '27 Mar 2024', homeScore: 1, awayScore: 0, competition: 'Sepak Bola Indonesia' },
+      { date: '23 Sep 2023', homeScore: 3, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+      { date: '11 Apr 2023', homeScore: 1, awayScore: 0, competition: 'Sepak Bola Indonesia' },
+      { date: '01 Okt 2022', homeScore: 3, awayScore: 2, competition: 'Sepak Bola Indonesia' },
+      { date: '23 Feb 2022', homeScore: 1, awayScore: 0, competition: 'Sepak Bola Indonesia' },
     ]
   },
   m2: {
@@ -419,11 +619,11 @@ const H2H_DATA: Record<string, any> = {
     draws: 1,
     awayWins: 1,
     history: [
-      { date: '30 Mei 2024', homeScore: 4, awayScore: 2, competition: 'BRI Liga 1 Championship' },
-      { date: '25 Mei 2024', homeScore: 0, awayScore: 0, competition: 'BRI Liga 1 Championship' },
-      { date: '12 Nov 2023', homeScore: 2, awayScore: 1, competition: 'BRI Liga 1' },
-      { date: '08 Jul 2023', homeScore: 3, awayScore: 1, competition: 'BRI Liga 1' },
-      { date: '03 Apr 2023', homeScore: 5, awayScore: 1, competition: 'BRI Liga 1' },
+      { date: '30 Mei 2024', homeScore: 4, awayScore: 2, competition: 'Sepak Bola Indonesia' },
+      { date: '25 Mei 2024', homeScore: 0, awayScore: 0, competition: 'Sepak Bola Indonesia' },
+      { date: '12 Nov 2023', homeScore: 2, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+      { date: '08 Jul 2023', homeScore: 3, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+      { date: '03 Apr 2023', homeScore: 5, awayScore: 1, competition: 'Sepak Bola Indonesia' },
     ]
   },
   m3: {
@@ -431,112 +631,14 @@ const H2H_DATA: Record<string, any> = {
     draws: 1,
     awayWins: 2,
     history: [
-      { date: '12 Nov 2024', homeScore: 1, awayScore: 1, competition: 'BRI Liga 1' },
-      { date: '12 Nov 2023', homeScore: 2, awayScore: 1, competition: 'BRI Liga 1' },
-      { date: '08 Jul 2023', homeScore: 2, awayScore: 1, competition: 'BRI Liga 1' },
-      { date: '01 Mar 2023', homeScore: 0, awayScore: 2, competition: 'BRI Liga 1' },
-      { date: '15 Sep 2022', homeScore: 1, awayScore: 1, competition: 'BRI Liga 1' },
+      { date: '12 Nov 2024', homeScore: 1, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+      { date: '12 Nov 2023', homeScore: 2, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+      { date: '08 Jul 2023', homeScore: 2, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+      { date: '01 Mar 2023', homeScore: 0, awayScore: 2, competition: 'Sepak Bola Indonesia' },
+      { date: '15 Sep 2022', homeScore: 1, awayScore: 1, competition: 'Sepak Bola Indonesia' },
     ]
   }
 };
-
-const TACTICAL_ARTICLES = [
-  { 
-    id: 'art-1', 
-    title: 'Bedah Taktis Mendalam: Skema High-Pressing 4-3-3 Bojan Hodak & Rest Defense Persib Bandung', 
-    summary: 'Studi komprehensif bagaimana transisi kilat Persib memanfaatkan celah di belakang bek sayap lawan melalui rotasi dinamis Ciro Alves & David da Silva, didukung struktur rest defense kokoh Marc Klok.', 
-    date: '31 Juli 2026', 
-    readTime: '12 mnt baca', 
-    author: 'Budi Santoso', 
-    role: 'Lead Data & Tactical Analyst', 
-    category: 'Analisis Tim', 
-    badgeColor: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    coverImage: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&auto=format&fit=crop&q=80',
-    keyTakeaways: [
-      'High-Block Pressing Trigger: Penyerang sayap memotong sudut operan ke fullback, memaksa bek tengah lawan mengoper ke jebakan lini tengah.',
-      'Eksploitasi Half-Space: Pergerakan tanpa bola dari lini kedua menghasilkan rerata angka expected goals (xG) hingga 2.14 per laga.',
-      'Struktur Rest Defense 2+1: Kombinasi Marc Klok, Dedi Kusnandar, dan Nick Kuipers mengunci zona transisi negatif dalam 5 detik pertama pasca kehilangan bola.',
-      'Efisiensi Final Third Recoveries: Persib mencatatkan 14.2 pemulihan bola per laga di sepertiga lapangan akhir lawan.'
-    ],
-    sections: [
-      {
-        heading: '1. Struktur Formasi & Pendekatan High-Block Dinamis',
-        content: `Dalam beberapa pertandingan terakhir BRI Liga 1, Persib Bandung di bawah asuhan pelatih Bojan Hodak menunjukkan kematangan taktis tingkat tinggi. Menggunakan fondasi dasar 4-3-3 yang fleksibel, Persib tidak pasif menunggu di area pertahanan sendiri, melainkan menerapkan garis pertahanan tinggi (high-block) yang terstruktur dan agresif.\n\nSaat lawan mencoba melakukan build-up dari lini belakang, trio penyerang Persib yang diisi David da Silva, Ciro Alves, dan winger pendamping menutup ruang tengah (center-channel). Mereka membentuk sudut presing yang mengarahkan operan bek tengah lawan ke area sisi lapangan (sideline trap). Begitu bola bergerak ke bek sayap lawan, bek sayap Persib bersama gelandang tengah terdekat langsung menekan dengan intensitas tinggi, menutup semua opsi passing pendek.`
-      },
-      {
-        heading: '2. Peran Vital Rest Defense (2+1) dalam Meredam Counter-Attack',
-        content: `Kunci keberhasilan high-pressing Persib terletak pada konsep 'Rest Defense'—organisasi pertahanan saat tim sedang melancarkan serangan. Dua bek tengah bersama satu gelandang bertahan membentuk benteng segitiga pertahanan 2+1.\n\nDengan menjaga jarak maksimal 15 meter di belakang lini serang, Marc Klok atau Dedi Kusnandar bertindak sebagai 'filter' pertama untuk memotong umpan lambung lawan. Struktur ini menggagalkan 78% potensi serangan balik cepat lawan sebelum memasuki area bahaya, sekaligus memberi kebebasan bagi para wing-back untuk melakukan overlap hingga garis akhir (byline).`
-      },
-      {
-        heading: '3. Rotasi Set-Piece & Efisiensi Konversi Peluang',
-        content: `Selain permainan terbuka (open play), skema bola mati Persib menyumbang rata-rata 0.65 xG per pertandingan. Memanfaatkan postur tinggi Nick Kuipers dan kejelian antisipasi bola kedua (second ball) oleh lini tengah, Persib secara rutin menciptakan situasi keunggulan kuantitatif di dalam kotak penalti 16 meter.`
-      }
-    ]
-  },
-  { 
-    id: 'art-2', 
-    title: 'Mengapa PPDA Borneo FC Menjadi yang Terendah & Paling Efektif di Liga 1?', 
-    summary: 'Studi data Passes Per Defensive Action menunjukkan dominasi counter-pressing tim Pesut Etam di zona pertahanan lawan melalui strategi sideline traps dan peran Stefano Lilipaly.', 
-    date: '30 Juli 2026', 
-    readTime: '10 mnt baca', 
-    author: 'Tim Scouting Sibundar', 
-    role: 'Football Data Intelligence', 
-    category: 'Metrik & Data', 
-    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    coverImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
-    keyTakeaways: [
-      'PPDA rerata 8.2 menjadikan Borneo FC tim paling intens merebut bola di seluruh BRI Liga 1.',
-      'Efisiensi konversi tembakan dari skema turnover tinggi mencapai angka fantastis 18.4%.',
-      'Stefano Lilipaly mencatatkan rekor Expected Assists (xA) tertinggi liga sebesar 0.42 per 90 menit.',
-      'Rerata 22.8 aksi bertahan di sepertiga lapangan akhir (Final Third Defensive Actions) per laga.'
-    ],
-    sections: [
-      {
-        heading: '1. Membedah Metrik PPDA (Passes Per Defensive Action)',
-        content: `Passes Per Defensive Action (PPDA) adalah metrik analitik modern untuk mengukur tingkat intensitas pressing sebuah tim. Semakin rendah angka PPDA, semakin sedikit umpan yang diizinkan kepada lawan sebelum tim melakukan tindakan bertahan (tackle, interception, foul, atau challenge).\n\nBorneo FC mencatatkan rekor impresif dengan rata-rata PPDA sebesar 8.2 sepanjang musim ini. Artinya, skuat Pesut Etam hanya membiarkan lawan mengoper bola 8 kali sebelum melancarkan tekel atau pemotongan umpan. Angka ini adalah yang terendah di BRI Liga 1, mengungguli tim-tim papan atas lainnya.`
-      },
-      {
-        heading: '2. Peran Visi Taktis Stefano Lilipaly & Sideline Traps',
-        content: `Counter-pressing Borneo FC bukan sekadar berlari tanpa arah. Di bawah instruksi taktis Pieter Huistra, gerakan presing dipicu oleh pemicu spesifik (pressing triggers): umpan lambung yang lambat, kontrol bola yang tidak sempurna dari bek lawan, atau saat bola dialirkan ke area garis tepi (touchline).\n\nStefano Lilipaly bertindak sebagai konduktor presing di lapangan depan. Dengan kecerdasan posisi (positional awareness) yang matang, Lilipaly tidak hanya menutup jalur umpan lawan tetapi juga secara cepat mengalirkan bola hasil turnover langsung ke zona berbahaya (danger zone) lawan.`
-      },
-      {
-        heading: '3. Konversi High Turnover Menjadi Peluang Gol Bersih',
-        content: `Merebut bola di area tinggi saja tidak cukup jika tidak diimbangi dengan keputusan cepat di sepertiga akhir. Borneo FC mencatatkan 14 gol yang lahir murni dari situasi High Turnover (perebutan bola kurang dari 40 meter dari gawang lawan). Waktu rata-rata yang dibutuhkan Borneo FC dari merebut bola hingga melepaskan tembakan adalah 6.4 detik, menunjukkan vertikalitas serangan yang sangat mematikan.`
-      },
-      {
-        heading: '4. Kesimpulan & Cara Membongkar High-Press Borneo FC',
-        content: `Bagi tim yang ingin meredam dominasi Borneo FC, kunci utamanya adalah melepaskan umpan diagonal panjang langsung melompati lini presing (over the top passing), atau menggunakan kiper yang mahir melakukan build-up bawah dengan ketenangan tinggi untuk memancing presing Borneo hingga menciptakan celah besar di lini tengah.`
-      }
-    ]
-  },
-  { 
-    id: 'art-3', 
-    title: 'Analisis Transisi Positif & Direct Football Persebaya Surabaya di Bawah Paul Munster', 
-    summary: 'Ulasan mendalam gaya bermain vertikal Bajul Ijo yang mengandalkan kecepatan wing-front dan serangan balik terukur untuk menghasilkan peluang xG berkualitas tinggi.', 
-    date: '28 Juli 2026', 
-    readTime: '9 mnt baca', 
-    author: 'Rahmat Hidayat', 
-    role: 'Senior Tactical Analyst', 
-    category: 'Formasi Taktis', 
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    coverImage: 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=1200&auto=format&fit=crop&q=80',
-    keyTakeaways: [
-      'Transisi Positif Tercepat: Rata-rata serangan balik Persebaya menghasilkan peluang tembakan dalam 8.1 detik.',
-      'Eksploitasi Celah Half-Space: Kombinasi Flavio Silva dan winger aktif menciptakan 3.4 peluang emas per laga.',
-      'Efisiensi Umpan Terobosan (Through-Balls): Tingkat keberhasilan umpan vertikal membelah pertahanan mencapai 68%.'
-    ],
-    sections: [
-      {
-        heading: '1. Filosofi Vertikalitas & Direct Transition',
-        content: `Persebaya Surabaya di bawah asuhan Paul Munster menekankan pada efisiensi penguasaan bola. Dibandingkan melakukan ball circulation pasif di pertahanan sendiri, Persebaya lebih menyukai skema umpan langsung (direct passing) yang langsung membelah garis pertahanan pertama lawan.`
-      },
-      {
-        heading: '2. Peran Pergerakan Tanpa Bola Flavio Silva',
-        content: `Flavio Silva berperan sebagai penyerang muara (target man & runner). Dengan kekuatan fisik dan kecepatan akselerasi, ia sering melakukan decoy runs yang menarik bek tengah lawan keluar dari posisinya, membuka ruang tembak bagi gelandang serang dari lini kedua.`
-      }
-    ]
-  }
-];
 
 const LIGA1_TEAMS = [
   {
@@ -923,55 +1025,137 @@ const Sparkline = ({ data = [10, 20, 15, 30, 25, 40], color = '#F97316' }: { dat
 
 const normalizeTeamName = (fullName: string) => {
   if (!fullName) return '';
-  const name = fullName.toUpperCase();
 
-  if (name.includes('BORNEO')) return 'Borneo FC';
+  const name = fullName.toUpperCase().trim();
+
+  if (name.includes('AREMA')) return 'Arema FC';
+  if (name.includes('BALI UNITED')) return 'Bali United';
   if (name.includes('BHAYANGKARA')) return 'Bhayangkara FC';
+  if (name.includes('BORNEO')) return 'Borneo FC';
+  if (name.includes('DEWA UNITED')) return 'Dewa United';
+  if (name.includes('MADURA UNITED')) return 'Madura United';
+  if (name.includes('MALUT UNITED')) return 'Malut United';
   if (name.includes('PERSEBAYA')) return 'Persebaya Surabaya';
   if (name.includes('PERSIB')) return 'Persib Bandung';
+  if (name.includes('PERSIJAP')) return 'Persijap Jepara';
   if (name.includes('PERSIJA')) return 'Persija Jakarta';
-  if (name.includes('PSM')) return 'PSM Makassar';
-  if (name.includes('MALUT')) return 'Malut United';
-  if (name.includes('DEWA')) return 'Dewa United';
-  if (name.includes('BALI')) return 'Bali United';
-  if (name.includes('AREMA')) return 'Arema FC';
-  if (name.includes('PERSIK KEDIRI') || name.includes('PERSIK')) return 'Persik Kediri';
-  if (name.includes('PERSITA')) return 'Persita Tangerang';
+  if (name.includes('PERSIK')) return 'Persik Kediri';
   if (name.includes('PERSIS')) return 'Persis Solo';
-  if (name.includes('MADURA')) return 'Madura United';
-  if (name.includes('SEMEN PADANG')) return 'Semen Padang';
+  if (name.includes('PERSITA')) return 'Persita Tangerang';
+  if (name.includes('PSBS')) return 'PSBS Biak';
+  if (name.includes('PSIM')) return 'PSIM Yogyakarta';
+  if (name.includes('PSM')) return 'PSM Makassar';
   if (name.includes('PSS')) return 'PSS Sleman';
-  if (name.includes('BARITO')) return 'Barito Putera';
-  if (name.includes('PSIS')) return 'PSIS Semarang';
+  if (name.includes('JAVA UNITED')) return 'Java United FC';
+  if (name.includes('GARUDAYAKSA')) return 'Garudayaksa FC';
+  if (name.includes('ISENMULANG')) return 'Isenmulang Kalteng FC';
+  if (name.includes('SEMEN PADANG')) return 'Semen Padang';
 
   return fullName;
 };
 
-const TeamBadge = ({ name, size = 'md' }: { name: string, size?: string }) => {
+/**
+ * SATU-SATUNYA sumber data logo klub.
+ *
+ * Semua komponen yang membutuhkan logo klub, termasuk
+ * standing table, sebaiknya mengambil data melalui helper ini.
+ */
+const getTeamInfo = (teamName: string) => {
+  const normalizedName = normalizeTeamName(teamName);
+
+  return {
+    normalizedName,
+    info: TEAM_INFO[normalizedName] || null,
+  };
+};
+
+const TeamBadge = ({
+  name,
+  size = 'md',
+}: {
+  name: string;
+  size?: string;
+}) => {
   const [imgError, setImgError] = useState(false);
-  const info = TEAM_INFO[name] || {
-    logo: `/logos/${name ? name.toLowerCase().replace(/\s+/g, '-') : 'default'}.svg`,
+
+  const { normalizedName, info } = getTeamInfo(name);
+
+  const fallbackInfo = {
+    logo: '',
     bg: 'from-slate-700 to-slate-900',
-    text: name ? name.substring(0, 3).toUpperCase() : 'FC',
-    border: 'border-slate-600'
+    text: normalizedName
+      ? normalizedName.substring(0, 3).toUpperCase()
+      : 'FC',
+    border: 'border-slate-600',
   };
 
-  const logoPath = info.logo || `/logos/${name ? name.toLowerCase().replace(/\s+/g, '-') : 'default'}.svg`;
-  const sizeClasses: Record<string, string> = { sm: 'w-6 h-6 text-[8px]', md: 'w-8 h-8 text-[10px]', lg: 'w-12 h-12 text-xs', xl: 'w-16 h-16 text-sm' };
-  const imgSizeClasses: Record<string, string> = { sm: 'w-4 h-4', md: 'w-5 h-5', lg: 'w-8 h-8', xl: 'w-11 h-11' };
+  const teamInfo = info || fallbackInfo;
+
+  const sizeClasses: Record<string, string> = {
+    sm: 'w-6 h-6 text-[8px]',
+    md: 'w-8 h-8 text-[10px]',
+    lg: 'w-12 h-12 text-xs',
+    xl: 'w-16 h-16 text-sm',
+  };
+
+  const imgSizeClasses: Record<string, string> = {
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-8 h-8',
+    xl: 'w-11 h-11',
+  };
 
   return (
-    <div className={`${sizeClasses[size] || sizeClasses.md} rounded-xl bg-[#111827] ${info.border} border flex items-center justify-center font-extrabold text-white shadow-md select-none shrink-0 p-1 relative overflow-hidden group`}>
-      {!imgError ? (
+    <div
+      className={`
+        ${sizeClasses[size] || sizeClasses.md}
+        rounded-xl
+        bg-[#111827]
+        ${teamInfo.border}
+        border
+        flex
+        items-center
+        justify-center
+        font-extrabold
+        text-white
+        shadow-md
+        select-none
+        shrink-0
+        p-1
+        relative
+        overflow-hidden
+        group
+      `}
+    >
+      {!imgError && teamInfo.logo ? (
         <img
-          src={logoPath}
-          alt={`Logo ${name}`}
-          className={`${imgSizeClasses[size] || imgSizeClasses.md} object-contain transition-transform duration-200 group-hover:scale-110`}
+          src={teamInfo.logo}
+          alt={`Logo ${normalizedName || name}`}
+          className={`
+            ${imgSizeClasses[size] || imgSizeClasses.md}
+            object-contain
+            transition-transform
+            duration-200
+            group-hover:scale-110
+          `}
           onError={() => setImgError(true)}
         />
       ) : (
-        <div className={`w-full h-full rounded-lg bg-gradient-to-br ${info.bg} flex items-center justify-center text-white font-black`}>
-          <span>{info.text ? info.text.substring(0, 3) : 'FC'}</span>
+        <div
+          className={`
+            w-full
+            h-full
+            rounded-lg
+            bg-gradient-to-br
+            ${teamInfo.bg}
+            flex
+            items-center
+            justify-center
+            text-white
+            font-black
+          `}
+        >
+          <span>{teamInfo.text?.substring(0, 3) || 'FC'}</span>
         </div>
       )}
     </div>
@@ -1016,8 +1200,6 @@ export default function App() {
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [activeCompareTab, setActiveCompareTab] = useState('telemetry');
   const [selectedH2HMatch, setSelectedH2HMatch] = useState<any>(null);
-  const [selectedArticle, setSelectedArticle] = useState<any>(null);
-  const [articleCategory, setArticleCategory] = useState('Semua');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPekan, setSelectedPekan] = useState('1');
@@ -1129,23 +1311,18 @@ export default function App() {
     setSelectedPekan(String(currentWeek));
   }, [upcomingMatches]);
 
-  const handleNavClick = (path: string) => {
-    if (path === '/reports') {
-      setSelectedArticle(null);
-    }
+  const handleNavClick = (_path: string) => {
     setIsMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleArticleClick = (article: any) => {
-    setSelectedArticle(article);
-    navigate('/reports');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setRequestSubmitted(true);
+
     setTimeout(() => {
       setRequestSubmitted(false);
       setIsAnalysisModalOpen(false);
@@ -1168,8 +1345,10 @@ export default function App() {
     { id: '/teams', label: t.nav.teams, icon: Shield },
     { id: '/players', label: t.nav.players, icon: Users },
     { id: '/services', label: t.nav.services, icon: Layers },
-    { id: '/reports', label: t.nav.reports, icon: FileText },
   ];
+
+  const REPORTS_BACKEND_URL =
+    'https://sibundar-api.vercel.app/articles_html';
 
   return (
     <div className="min-h-screen bg-[#0B1220] text-slate-100 font-sans antialiased flex flex-col selection:bg-orange-500 selection:text-black relative overflow-x-hidden">
@@ -1221,9 +1400,9 @@ export default function App() {
         <div className="max-w-[1700px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
           
           <Link to="/" className="flex items-center gap-2.5 shrink-0 cursor-pointer group" onClick={() => handleNavClick('/')}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center translate-y-[2px]">
               <img 
-                src="favicon.png" 
+                src="/favicon.png" 
                 alt="Logo Sibundar" 
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" 
               />
@@ -1232,14 +1411,16 @@ export default function App() {
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">Sibundar</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium hidden md:block">Analisis Sepak Bola Liga 1</p>
+              <p className="text-[10px] text-slate-400 font-medium hidden md:block">Analisis Sepak Bola Sepak Bola Indonesia</p>
             </div>
           </Link>
 
           <nav className="hidden xl:flex items-center gap-1 bg-[#111827]/80 p-1 rounded-2xl border border-white/[0.06] overflow-x-auto scrollbar-none">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.id;
+              const isActive =
+                location.pathname === item.id;
+
               return (
                 <Link
                   key={item.id}
@@ -1251,11 +1432,25 @@ export default function App() {
                       : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : 'text-slate-400'} transition-transform duration-300 group-hover:scale-110`} />
+                  <Icon
+                    className={`w-3.5 h-3.5 ${
+                      isActive
+                        ? 'text-slate-950'
+                        : 'text-slate-400'
+                    }`}
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
+
+            <a
+              href={REPORTS_BACKEND_URL}
+              className="flex items-center gap-2 py-1.5 px-3 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all duration-300 shrink-0 transform active:scale-95"
+            >
+              <FileText className="w-3.5 h-3.5 text-slate-400" />
+              <span>{t.nav.reports}</span>
+            </a>
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2.5">
@@ -1308,25 +1503,43 @@ export default function App() {
             <div className="grid grid-cols-2 gap-2 pt-1">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.id;
+                const isActive =
+                  location.pathname === item.id;
+
                 return (
                   <Link
                     key={item.id}
                     to={item.id}
                     onClick={() => handleNavClick(item.id)}
                     className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold active:scale-95 transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-orange-500 text-slate-950 font-bold shadow-md shadow-orange-500/20' 
+                      isActive
+                        ? 'bg-orange-500 text-slate-950 font-bold shadow-md shadow-orange-500/20'
                         : 'text-slate-300 bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08]'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-slate-950' : 'text-orange-400'} shrink-0`} />
+                      <Icon
+                        className={`w-4 h-4 ${
+                          isActive
+                            ? 'text-slate-950'
+                            : 'text-orange-400'
+                        } shrink-0`}
+                      />
                       <span>{item.label}</span>
                     </div>
                   </Link>
                 );
               })}
+
+              <a
+                href={REPORTS_BACKEND_URL}
+                className="flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] active:scale-95 transition-all duration-200"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-slate-400" />
+                  <span>{t.nav.reports}</span>
+                </div>
+              </a>
             </div>
           </div>
         )}
@@ -1361,7 +1574,6 @@ export default function App() {
               PAST_MATCHES_HISTORY={PAST_MATCHES_HISTORY}
               normalizeTeamName={normalizeTeamName}
               TeamBadge={TeamBadge}
-              setIsCompareModalOpen={setIsCompareModalOpen}
             />
           } />
 
@@ -1378,17 +1590,6 @@ export default function App() {
           <Route path="/players" element={<PlayersView TOP_PLAYERS={TOP_PLAYERS} />} />
 
           <Route path="/services" element={<ServicesView t={t} openServiceModal={openServiceModal} />} />
-
-          <Route path="/reports" element={
-            <ReportsView
-              selectedArticle={selectedArticle}
-              setSelectedArticle={setSelectedArticle}
-              articleCategory={articleCategory}
-              setArticleCategory={setArticleCategory}
-              TACTICAL_ARTICLES={TACTICAL_ARTICLES}
-              handleArticleClick={handleArticleClick}
-            />
-          } />
         </Routes>
       </main>
 
@@ -1399,15 +1600,16 @@ export default function App() {
             
             <div className="lg:col-span-2 space-y-4">
               <Link to="/" className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNavClick('/')}>
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full bg-[#0B1220] rounded-[14px] flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-orange-400" />
-                  </div>
+                <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <img
+                    src="/favicon.png"
+                    alt="Sibundar"
+                    className="w-10 h-10 object-contain"
+                  />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="font-black text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">Sibundar</span>
-                    <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">PRO</span>
                   </div>
                   <p className="text-xs text-slate-400 font-medium">Football Tactical Intelligence</p>
                 </div>
@@ -1469,7 +1671,7 @@ export default function App() {
               <ul className="space-y-2 text-xs">
                 {NAV_ITEMS.map((item) => (
                   <li key={item.id}>
-                    <Link 
+                    <Link
                       to={item.id}
                       onClick={() => handleNavClick(item.id)}
                       className="text-slate-400 hover:text-orange-400 transition-colors flex items-center gap-1 cursor-pointer group"
@@ -1479,6 +1681,16 @@ export default function App() {
                     </Link>
                   </li>
                 ))}
+
+                <li>
+                  <a
+                    href={REPORTS_BACKEND_URL}
+                    className="text-slate-400 hover:text-orange-400 transition-colors flex items-center gap-1 cursor-pointer group"
+                  >
+                    <ChevronRight className="w-3 h-3 text-orange-500 group-hover:translate-x-1 transition-transform" />
+                    <span>{t.nav.reports}</span>
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -1487,7 +1699,7 @@ export default function App() {
                 {t.footer.socialTitle}
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Dapatkan update statistik xG harian, analisis taktis, dan info telemetri langsung di medsos kami.
+                Dapatkan update statistik pertandingan harian, analisis taktis, dan info statistik langsung di medsos kami.
               </p>
 
               <div className="flex flex-wrap gap-2 pt-1">
@@ -1654,7 +1866,7 @@ export default function App() {
             {activeCompareTab === 'telemetry' && (
               <div className="space-y-3 py-2 animate-pop">
                 {[
-                  { label: t.modalCompare.xg, home: '2.14', away: '1.08', homeWidth: '66%', awayWidth: '34%' },
+                  { label: t.modalCompare.xg, home: '14', away: '9', homeWidth: '61%', awayWidth: '39%' },
                   { label: t.modalCompare.fieldTilt, home: '61%', away: '39%', homeWidth: '61%', awayWidth: '39%' },
                   { label: t.modalCompare.ppda, home: '8.4', away: '12.1', homeWidth: '55%', awayWidth: '45%' },
                   { label: t.modalCompare.counterAttacks, home: '7', away: '4', homeWidth: '63%', awayWidth: '37%' },
@@ -1679,15 +1891,15 @@ export default function App() {
               <div className="space-y-3 py-2 text-xs animate-pop">
                 <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between hover:scale-[1.01] transition-transform">
                   <span className="font-bold text-orange-400">14' GOL! - David da Silva</span>
-                  <span className="text-slate-400">(Persib Bandung) • xG 0.68</span>
+                  <span className="text-slate-400">(Persib Bandung)</span>
                 </div>
                 <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between hover:scale-[1.01] transition-transform">
                   <span className="font-bold text-blue-400">38' GOL! - Marko Simic</span>
-                  <span className="text-slate-400">(Persija Jakarta) • xG 0.45</span>
+                  <span className="text-slate-400">(Persija Jakarta)</span>
                 </div>
                 <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between hover:scale-[1.01] transition-transform">
                   <span className="font-bold text-orange-400">62' GOL! - Ciro Alves</span>
-                  <span className="text-slate-400">(Persib Bandung) • xG 0.81</span>
+                  <span className="text-slate-400">(Persib Bandung)</span>
                 </div>
               </div>
             )}
@@ -1745,9 +1957,9 @@ export default function App() {
 
             {(() => {
               const h2h = H2H_DATA[selectedH2HMatch.id] || { homeWins: 2, draws: 1, awayWins: 1, history: [
-                { date: '27 Mar 2024', homeScore: 2, awayScore: 1, competition: 'BRI Liga 1' },
-                { date: '23 Sep 2023', homeScore: 1, awayScore: 1, competition: 'BRI Liga 1' },
-                { date: '11 Apr 2023', homeScore: 3, awayScore: 0, competition: 'BRI Liga 1' }
+                { date: '27 Mar 2024', homeScore: 2, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+                { date: '23 Sep 2023', homeScore: 1, awayScore: 1, competition: 'Sepak Bola Indonesia' },
+                { date: '11 Apr 2023', homeScore: 3, awayScore: 0, competition: 'Sepak Bola Indonesia' }
               ]};
 
               return (

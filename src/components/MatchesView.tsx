@@ -28,7 +28,6 @@ export interface MatchesViewProps {
   PAST_MATCHES_HISTORY?: MatchRecord[];
   normalizeTeamName: (fullName: string) => string;
   TeamBadge: ComponentType<{ name: string; size?: string }>;
-  setIsCompareModalOpen: (open: boolean) => void;
   formatMatchDate?: (dateStr?: string, timeStr?: string) => string;
 }
 
@@ -38,8 +37,7 @@ export default function MatchesView({
   searchQuery,
   normalizeTeamName,
   TeamBadge,
-  setIsCompareModalOpen,
-  formatMatchDate = (d) => d || '',
+formatMatchDate = (d) => d || '',
 }: MatchesViewProps) {
   const [selectedSeason, setSelectedSeason] = useState<string>('2026-27');
   const [internalWeek, setInternalWeek] = useState<string>('1');
@@ -136,6 +134,12 @@ export default function MatchesView({
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Statistik pertandingan masih dalam pengembangan.
+  // Modal Coming Soon dikelola lokal agar halaman ini
+  // tidak bergantung pada isi compare modal di App.tsx.
+  const [showStatsComingSoon, setShowStatsComingSoon] =
+    useState(false);
 
   const fetchMatchHistory = async (season: string, week: string) => {
     try {
@@ -357,17 +361,56 @@ export default function MatchesView({
                 </div>
 
                 <button
-                  onClick={() => setIsCompareModalOpen(true)}
+                  onClick={() => setShowStatsComingSoon(true)}
                   className="w-full py-2.5 rounded-xl bg-white/[0.05] hover:bg-orange-500 hover:text-slate-950 text-slate-200 text-xs font-extrabold border border-white/10 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer active:scale-95"
                 >
                   <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Lihat Telemetri Laga</span>
+                  <span>Lihat Statistik Laga</span>
                 </button>
               </div>
             );
           })}
         </div>
       )}
+      {showStatsComingSoon && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Statistik Laga"
+          onClick={() => setShowStatsComingSoon(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-[#111827] border border-white/[0.08] shadow-2xl p-7 text-center"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+              <BarChart3 className="w-7 h-7 text-orange-400" />
+            </div>
+
+            <h3 className="text-lg font-extrabold text-white">
+              Statistik Laga
+            </h3>
+
+            <p className="mt-2 text-sm font-bold text-orange-400">
+              Coming Soon
+            </p>
+
+            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              Fitur statistik lengkap pertandingan sedang dalam pengembangan.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setShowStatsComingSoon(false)}
+              className="mt-6 w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-extrabold transition-all active:scale-95"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
