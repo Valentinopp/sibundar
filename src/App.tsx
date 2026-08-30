@@ -1408,7 +1408,7 @@ export default function App() {
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-orange-400 transition-colors">Sibundar</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium hidden md:block">Analisis Sepak Bola Sepak Bola Indonesia</p>
+              <p className="text-[10px] text-slate-400 font-medium hidden md:block">Analisis Sepak Bola Indonesia</p>
             </div>
           </Link>
 
