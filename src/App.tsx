@@ -1347,9 +1347,6 @@ export default function App() {
     { id: '/services', label: t.nav.services, icon: Layers },
   ];
 
-  const REPORTS_BACKEND_URL =
-    'https://sibundar-api.vercel.app/articles_html';
-
   return (
     <div className="min-h-screen bg-[#0B1220] text-slate-100 font-sans antialiased flex flex-col selection:bg-orange-500 selection:text-black relative overflow-x-hidden">
       
@@ -1445,7 +1442,7 @@ export default function App() {
             })}
 
             <a
-              href={REPORTS_BACKEND_URL}
+              href="/report"
               className="flex items-center gap-2 py-1.5 px-3 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all duration-300 shrink-0 transform active:scale-95"
             >
               <FileText className="w-3.5 h-3.5 text-slate-400" />
@@ -1532,11 +1529,22 @@ export default function App() {
               })}
 
               <a
-                href={REPORTS_BACKEND_URL}
-                className="flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] active:scale-95 transition-all duration-200"
+                href="/report"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold active:scale-95 transition-all duration-200 ${
+                  location.pathname === '/report'
+                    ? 'bg-orange-500 text-slate-950 font-bold shadow-md shadow-orange-500/20'
+                    : 'text-slate-300 bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08]'
+                }`}
               >
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-slate-400" />
+                  <FileText
+                    className={`w-4 h-4 ${
+                      location.pathname === '/report'
+                        ? 'text-slate-950'
+                        : 'text-orange-400'
+                    } shrink-0`}
+                  />
                   <span>{t.nav.reports}</span>
                 </div>
               </a>
@@ -1684,7 +1692,7 @@ export default function App() {
 
                 <li>
                   <a
-                    href={REPORTS_BACKEND_URL}
+                    href="/report"
                     className="text-slate-400 hover:text-orange-400 transition-colors flex items-center gap-1 cursor-pointer group"
                   >
                     <ChevronRight className="w-3 h-3 text-orange-500 group-hover:translate-x-1 transition-transform" />

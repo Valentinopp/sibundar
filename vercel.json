@@ -2,6 +2,30 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/matches",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/statistics",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/teams",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/players",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/services",
+      "destination": "/index.html"
+    },
+    {
       "source": "/report",
       "destination": "https://sibundar-api.vercel.app/articles_html"
     },
