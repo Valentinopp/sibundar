@@ -2,6 +2,14 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/report",
+      "destination": "https://sibundar-api.vercel.app/articles_html"
+    },
+    {
+      "source": "/:slug",
+      "destination": "https://sibundar-api.vercel.app/articles_html/:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
