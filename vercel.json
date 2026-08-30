@@ -2,8 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/report",
+      "destination": "https://sibundar-api.vercel.app/articles_html"
     },
     {
       "source": "/matches",
@@ -26,16 +26,12 @@
       "destination": "/index.html"
     },
     {
-      "source": "/report",
-      "destination": "https://sibundar-api.vercel.app/articles_html"
+      "source": "/",
+      "destination": "/index.html"
     },
     {
       "source": "/:slug",
       "destination": "https://sibundar-api.vercel.app/articles/:slug"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
