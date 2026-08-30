@@ -26,12 +26,16 @@
       "destination": "/index.html"
     },
     {
+      "source": "/:slug",
+      "destination": "https://sibundar-api.vercel.app/articles/:slug"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     },
     {
-      "source": "/:slug",
-      "destination": "https://sibundar-api.vercel.app/articles/:slug"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
