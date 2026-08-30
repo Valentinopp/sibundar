@@ -31,7 +31,7 @@
     },
     {
       "source": "/:slug",
-      "destination": "https://sibundar-api.vercel.app/articles_html/:slug"
+      "destination": "https://sibundar-api.vercel.app/articles/:slug"
     },
     {
       "source": "/(.*)",
