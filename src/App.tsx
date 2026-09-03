@@ -133,14 +133,14 @@ const TRANSLATIONS: Record<string, any> = {
       heading: 'Paket Laporan Pertandingan',
       subheading: 'Pilih paket laporan sesuai kebutuhan tim atau komunitas Anda',
       pkg1Title: 'Laporan Dasar',
-      pkg1Price: 'Rp 50.000',
+      pkg1Price: 'Coming Soon',
       pkg1Features: [
         'Statistik Dasar (Penguasaan, Tembakan, Umpan)',
         'Formasi & Susunan Pemain',
         'Skor Akhir & Ringkasan Laga Singkat'
       ],
       pkg2Title: 'Analisis Taktis',
-      pkg2Price: 'Rp 200.000',
+      pkg2Price: 'Coming Soon',
       pkg2Features: [
         'Semua fitur Laporan Dasar',
         'Statistik Serangan & Peluang',
@@ -149,7 +149,7 @@ const TRANSLATIONS: Record<string, any> = {
         'Peta Aliran Umpan'
       ],
       pkg3Title: 'Scouting Lengkap',
-      pkg3Price: 'Rp 500.000',
+      pkg3Price: 'Coming Soon',
       pkg3Features: [
         'Semua fitur Analisis Taktis',
         'Analisis Video & Klip Sorotan',
