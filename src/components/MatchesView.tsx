@@ -15,21 +15,69 @@ import {
 interface MatchRecord {
   id?: string;
   _id?: string;
+
+  competition?: string;
+  season?: string;
+
   pekan?: number;
   week?: number | string;
+
   tanggal?: string;
   match_date?: string;
   match_time?: string;
+
   tim_home?: string;
   home_team?: string;
+
   tim_away?: string;
   away_team?: string;
+
   skor?: string;
   home_score?: number | null;
   away_score?: number | null;
+
   stadion?: string;
   stadium?: string;
+
   status?: string | null;
+}
+
+interface TeamStatistics {
+  shots: number;
+  shots_on_target: number;
+  possession: number;
+  passes: number;
+  pass_accuracy: number;
+  fouls: number;
+  yellow_cards: number;
+  red_cards: number;
+  offsides: number;
+  corners: number;
+}
+
+interface MatchStatisticsResponse {
+  match_id: string;
+  home_team_stats: TeamStatistics;
+  away_team_stats: TeamStatistics;
+}
+
+interface MatchStats {
+  shots: [number, number];
+  shotsOnTarget: [number, number];
+  possession: [number, number];
+  fouls: [number, number];
+  yellowCards: [number, number];
+  redCards: [number, number];
+  offsides: [number, number];
+  corners: [number, number];
+}
+
+interface StatRow {
+  label: string;
+  values: [number, number];
+  unit?: string;
+  highlightHome?: boolean;
+  highlightAway?: boolean;
 }
 
 export interface MatchesViewProps {
@@ -54,20 +102,99 @@ export default function MatchesView({
   searchQuery,
   normalizeTeamName,
   TeamBadge,
-  formatMatchDate = (d) => d || '',
+  formatMatchDate = (dateStr) => {
+    if (!dateStr) return '';
+
+    const date = new Date(
+      `${dateStr}T00:00:00`
+    );
+
+    if (Number.isNaN(date.getTime())) {
+      return dateStr;
+    }
+
+    return date.toLocaleDateString(
+      'id-ID',
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }
+    );
+  },
 }: MatchesViewProps) {
+  /*
+   * ============================================================
+   * SEASON & WEEK
+   * ============================================================
+   */
   const [selectedSeason, setSelectedSeason] =
     useState<string>('2026-27');
 
   const [internalWeek, setInternalWeek] =
     useState<string>('1');
 
-  // Menandai apakah sinkronisasi pekan otomatis
-  // untuk musim aktif sudah dilakukan.
-  const autoWeekSyncedRef = useRef(false);
+  const autoWeekSyncedRef =
+    useRef(false);
 
   const activeWeek =
     externalSelectedPekan || internalWeek;
+
+  /*
+   * ============================================================
+   * MATCH STATE
+   * ============================================================
+   */
+  const [matches, setMatches] =
+    useState<MatchRecord[]>([]);
+
+  const [isLoading, setIsLoading] =
+    useState<boolean>(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  /*
+   * ============================================================
+   * STATISTICS MODAL STATE
+   * ============================================================
+   */
+  const [
+    showMatchStats,
+    setShowMatchStats,
+  ] = useState(false);
+
+  const [
+    selectedMatch,
+    setSelectedMatch,
+  ] = useState<MatchRecord | null>(null);
+
+  /*
+   * Loading khusus statistik.
+   */
+  const [
+    isStatsLoading,
+    setIsStatsLoading,
+  ] = useState(false);
+
+  /*
+   * Error khusus statistik.
+   */
+  const [
+    statsError,
+    setStatsError,
+  ] = useState<string | null>(null);
+
+  /*
+   * Data statistik pertandingan dari API.
+   */
+  const [
+    matchStatistics,
+    setMatchStatistics,
+  ] =
+    useState<MatchStatisticsResponse | null>(
+      null
+    );
 
   /*
    * ============================================================
@@ -93,9 +220,12 @@ export default function MatchesView({
         }
       );
 
-      if (!response.ok) return [];
+      if (!response.ok) {
+        return [];
+      }
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (Array.isArray(data)) {
         return data;
@@ -137,7 +267,6 @@ export default function MatchesView({
   ): Promise<string> => {
     const today = new Date();
 
-    // Cek seluruh pekan 1-34 secara paralel.
     const weekResults = await Promise.all(
       Array.from(
         { length: 34 },
@@ -153,11 +282,9 @@ export default function MatchesView({
 
     weekResults.forEach(
       (weekMatches, index) => {
-        const weekNumber = index + 1;
+        const weekNumber =
+          index + 1;
 
-        // Pekan dianggap sudah dimulai ketika
-        // minimal satu pertandingan memiliki
-        // tanggal <= hari ini.
         const hasStarted =
           weekMatches.some((match) => {
             const dateValue =
@@ -169,7 +296,9 @@ export default function MatchesView({
             }
 
             const matchDate =
-              new Date(dateValue);
+              new Date(
+                `${dateValue}T00:00:00`
+              );
 
             return (
               !Number.isNaN(
@@ -226,38 +355,14 @@ export default function MatchesView({
    * ============================================================
    */
   const handleWeekChange = (
-    w: string
+    week: string
   ) => {
     if (externalSetSelectedPekan) {
-      externalSetSelectedPekan(w);
+      externalSetSelectedPekan(week);
     } else {
-      setInternalWeek(w);
+      setInternalWeek(week);
     }
   };
-
-  /*
-   * ============================================================
-   * MATCH STATE
-   * ============================================================
-   */
-  const [matches, setMatches] =
-    useState<MatchRecord[]>([]);
-
-  const [isLoading, setIsLoading] =
-    useState<boolean>(true);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  /*
-   * ============================================================
-   * STATISTICS COMING SOON MODAL
-   * ============================================================
-   */
-  const [
-    showStatsComingSoon,
-    setShowStatsComingSoon,
-  ] = useState(false);
 
   /*
    * ============================================================
@@ -278,7 +383,11 @@ export default function MatchesView({
           : week;
 
       const response = await fetch(
-        `https://sibundar-api.vercel.app/usr/match/match_history?season=${season}&week=${targetWeek}&_t=${Date.now()}`,
+        `https://sibundar-api.vercel.app/usr/match/match_history?season=${encodeURIComponent(
+          season
+        )}&week=${encodeURIComponent(
+          targetWeek
+        )}&_t=${Date.now()}`,
         {
           cache: 'no-store',
           headers: {
@@ -315,7 +424,8 @@ export default function MatchesView({
         } else if (
           Array.isArray(data.data)
         ) {
-          matchData = data.data;
+          matchData =
+            data.data;
         } else if (
           Array.isArray(data.result)
         ) {
@@ -332,12 +442,125 @@ export default function MatchesView({
       );
 
       setError(
-        err.message ||
+        err?.message ||
           'Gagal terhubung ke API'
       );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /*
+   * ============================================================
+   * FETCH MATCH STATISTICS
+   *
+   * Endpoint:
+   * /usr/match/statistic/{match_id}
+   *
+   * match_id diambil langsung dari:
+   * selectedMatch._id atau selectedMatch.id
+   * ============================================================
+   */
+  const fetchMatchStatistics = async (
+    match: MatchRecord
+  ) => {
+    const matchId =
+      match._id || match.id;
+
+    if (!matchId) {
+      setStatsError(
+        'ID pertandingan tidak ditemukan.'
+      );
+      return;
+    }
+
+    try {
+      setIsStatsLoading(true);
+      setStatsError(null);
+      setMatchStatistics(null);
+
+      const response = await fetch(
+        `https://sibundar-api.vercel.app/usr/match/statistic/${encodeURIComponent(
+          matchId
+        )}?_t=${Date.now()}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control':
+              'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}: Gagal mengambil statistik pertandingan`
+        );
+      }
+
+      const data =
+        (await response.json()) as MatchStatisticsResponse;
+
+      /*
+       * Validasi response sederhana agar UI
+       * tidak mencoba membaca struktur yang salah.
+       */
+      if (
+        !data ||
+        !data.home_team_stats ||
+        !data.away_team_stats
+      ) {
+        throw new Error(
+          'Format data statistik dari API tidak valid.'
+        );
+      }
+
+      setMatchStatistics(data);
+    } catch (err: any) {
+      console.error(
+        'Error fetching match statistics:',
+        err
+      );
+
+      setStatsError(
+        err?.message ||
+          'Gagal mengambil statistik pertandingan.'
+      );
+    } finally {
+      setIsStatsLoading(false);
+    }
+  };
+
+  /*
+   * ============================================================
+   * OPEN STATISTICS
+   * ============================================================
+   */
+  const openMatchStatistics = (
+    match: MatchRecord
+  ) => {
+    setSelectedMatch(match);
+    setShowMatchStats(true);
+
+    /*
+     * Ambil statistik berdasarkan ID
+     * pertandingan yang diklik.
+     */
+    fetchMatchStatistics(match);
+  };
+
+  /*
+   * ============================================================
+   * CLOSE STATISTICS
+   * ============================================================
+   */
+  const closeStatistics = () => {
+    setShowMatchStats(false);
+    setSelectedMatch(null);
+    setMatchStatistics(null);
+    setStatsError(null);
+    setIsStatsLoading(false);
   };
 
   /*
@@ -405,11 +628,11 @@ export default function MatchesView({
 
   /*
    * ============================================================
-   * ESCAPE KEY FOR MODAL
+   * ESCAPE KEY
    * ============================================================
    */
   useEffect(() => {
-    if (!showStatsComingSoon) {
+    if (!showMatchStats) {
       return;
     }
 
@@ -417,9 +640,7 @@ export default function MatchesView({
       event: KeyboardEvent
     ) => {
       if (event.key === 'Escape') {
-        setShowStatsComingSoon(
-          false
-        );
+        closeStatistics();
       }
     };
 
@@ -434,15 +655,15 @@ export default function MatchesView({
         handleEscape
       );
     };
-  }, [showStatsComingSoon]);
+  }, [showMatchStats]);
 
   /*
    * ============================================================
-   * LOCK BODY SCROLL WHEN MODAL OPEN
+   * LOCK BODY SCROLL
    * ============================================================
    */
   useEffect(() => {
-    if (!showStatsComingSoon) {
+    if (!showMatchStats) {
       return;
     }
 
@@ -456,7 +677,7 @@ export default function MatchesView({
       document.body.style.overflow =
         previousOverflow;
     };
-  }, [showStatsComingSoon]);
+  }, [showMatchStats]);
 
   /*
    * ============================================================
@@ -464,143 +685,526 @@ export default function MatchesView({
    * ============================================================
    */
   const filteredMatches =
-    matches.filter((m) => {
+    matches.filter((match) => {
       if (!searchQuery) {
         return true;
       }
 
-      const q =
+      const query =
         searchQuery.toLowerCase();
 
       const home = (
-        m.home_team ||
-        m.tim_home ||
+        match.home_team ||
+        match.tim_home ||
         ''
       ).toLowerCase();
 
       const away = (
-        m.away_team ||
-        m.tim_away ||
+        match.away_team ||
+        match.tim_away ||
         ''
       ).toLowerCase();
 
       const stadium = (
-        m.stadium ||
-        m.stadion ||
+        match.stadium ||
+        match.stadion ||
         ''
       ).toLowerCase();
 
       return (
-        home.includes(q) ||
-        away.includes(q) ||
-        stadium.includes(q)
+        home.includes(query) ||
+        away.includes(query) ||
+        stadium.includes(query)
       );
     });
 
   /*
    * ============================================================
-   * STATISTICS COMING SOON MODAL
+   * CONVERT API STATISTICS
    * ============================================================
    *
-   * PENTING:
-   * Modal dirender menggunakan createPortal ke document.body.
+   * API:
    *
-   * Jadi modal tidak lagi mengikuti parent/container,
-   * melainkan langsung mengikuti viewport browser.
+   * home_team_stats
+   * away_team_stats
+   *
+   * Passes dan pass_accuracy sengaja
+   * tidak dimasukkan ke tabel.
+   */
+  const currentStats: MatchStats | null =
+    matchStatistics
+      ? {
+          shots: [
+            matchStatistics
+              .home_team_stats.shots,
+            matchStatistics
+              .away_team_stats.shots,
+          ],
+
+          shotsOnTarget: [
+            matchStatistics
+              .home_team_stats
+              .shots_on_target,
+            matchStatistics
+              .away_team_stats
+              .shots_on_target,
+          ],
+
+          possession: [
+            matchStatistics
+              .home_team_stats.possession,
+            matchStatistics
+              .away_team_stats.possession,
+          ],
+
+          fouls: [
+            matchStatistics
+              .home_team_stats.fouls,
+            matchStatistics
+              .away_team_stats.fouls,
+          ],
+
+          yellowCards: [
+            matchStatistics
+              .home_team_stats
+              .yellow_cards,
+            matchStatistics
+              .away_team_stats
+              .yellow_cards,
+          ],
+
+          redCards: [
+            matchStatistics
+              .home_team_stats.red_cards,
+            matchStatistics
+              .away_team_stats.red_cards,
+          ],
+
+          offsides: [
+            matchStatistics
+              .home_team_stats.offsides,
+            matchStatistics
+              .away_team_stats.offsides,
+          ],
+
+          corners: [
+            matchStatistics
+              .home_team_stats.corners,
+            matchStatistics
+              .away_team_stats.corners,
+          ],
+        }
+      : null;
+
+  /*
+   * ============================================================
+   * STATISTIC ROWS
    * ============================================================
    */
-  const statsComingSoonModal =
-    showStatsComingSoon &&
-    typeof document !==
-      'undefined'
+  const statRows: StatRow[] =
+    currentStats
+      ? [
+          {
+            label: 'Shots',
+            values:
+              currentStats.shots,
+          },
+          {
+            label: 'Shots on target',
+            values:
+              currentStats.shotsOnTarget,
+          },
+          {
+            label: 'Possession',
+            values:
+              currentStats.possession,
+            unit: '%',
+          },
+          {
+            label: 'Fouls',
+            values:
+              currentStats.fouls,
+          },
+          {
+            label: 'Yellow cards',
+            values:
+              currentStats.yellowCards,
+          },
+          {
+            label: 'Red cards',
+            values:
+              currentStats.redCards,
+          },
+          {
+            label: 'Offsides',
+            values:
+              currentStats.offsides,
+          },
+          {
+            label: 'Corners',
+            values:
+              currentStats.corners,
+          },
+        ]
+      : [];
+
+  /*
+   * ============================================================
+   * STATISTICS MODAL
+   * ============================================================
+   */
+  const matchStatsModal =
+    showMatchStats &&
+    selectedMatch &&
+    typeof document !== 'undefined'
       ? createPortal(
           <div
             className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="stats-coming-soon-title"
-            onClick={() =>
-              setShowStatsComingSoon(
-                false
-              )
-            }
+            aria-labelledby="match-stats-title"
+            onClick={closeStatistics}
           >
             {/* BACKDROP */}
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
             {/* MODAL */}
             <div
-              className="relative z-10 w-full max-w-sm rounded-3xl bg-[#111827] border border-white/[0.08] shadow-2xl p-7 text-center animate-pop"
+              className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#111827] border border-white/[0.08] shadow-2xl p-5 sm:p-7 animate-pop"
               onClick={(event) =>
                 event.stopPropagation()
               }
             >
-              {/* CLOSE ICON */}
+              {/* CLOSE */}
               <button
                 type="button"
-                onClick={() =>
-                  setShowStatsComingSoon(
-                    false
-                  )
-                }
+                onClick={closeStatistics}
                 className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
                 aria-label="Tutup"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              {/* ICON */}
-              <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-                <BarChart3 className="w-7 h-7 text-orange-400" />
+              {/* ==================================================
+                  TITLE
+              ================================================== */}
+              <div className="text-center mb-6 px-8">
+
+                <div className="mx-auto mb-3 w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-orange-400" />
+                </div>
+
+                <h3
+                  id="match-stats-title"
+                  className="text-lg sm:text-xl font-extrabold text-white"
+                >
+                  Statistik Pertandingan
+                </h3>
+
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
+
+                  <span className="text-slate-400">
+                    {selectedMatch.match_date ||
+                      selectedMatch.tanggal ||
+                      '-'}
+                  </span>
+
+                  {selectedMatch.match_time && (
+                    <>
+                      <span className="text-slate-600">
+                        •
+                      </span>
+
+                      <span className="font-bold text-orange-400">
+                        {selectedMatch.match_time} WIB
+                      </span>
+                    </>
+                  )}
+
+                </div>
               </div>
 
-              {/* TITLE */}
-              <h3
-                id="stats-coming-soon-title"
-                className="text-lg font-extrabold text-white"
-              >
-                Statistik Laga
-              </h3>
+              {/* ==================================================
+                  TEAMS
+              ================================================== */}
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 mb-8">
 
-              {/* COMING SOON */}
-              <p className="mt-2 text-sm font-bold text-orange-400">
-                Coming Soon
-              </p>
+                {/* HOME */}
+                <div className="flex flex-col items-center text-center gap-3 min-w-0">
 
-              {/* DESCRIPTION */}
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Fitur statistik lengkap
-                pertandingan sedang
-                dalam pengembangan.
-              </p>
+                  <div className="scale-[1.35]">
+                    <TeamBadge
+                      name={normalizeTeamName(
+                        selectedMatch.home_team ||
+                          selectedMatch.tim_home ||
+                          'Home Team'
+                      )}
+                      size="md"
+                    />
+                  </div>
 
-              {/* CLOSE BUTTON */}
+                  <span className="text-sm font-bold text-white leading-tight max-w-[180px]">
+                    {selectedMatch.home_team ||
+                      selectedMatch.tim_home ||
+                      'Home Team'}
+                  </span>
+
+                </div>
+
+                {/* SCORE */}
+                <div className="flex flex-col items-center justify-center shrink-0">
+
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">
+                    VS
+                  </span>
+
+                  <span className="mt-1 text-lg font-black text-white">
+                    {selectedMatch.home_score ??
+                      '-'}
+                    {' : '}
+                    {selectedMatch.away_score ??
+                      '-'}
+                  </span>
+
+                </div>
+
+                {/* AWAY */}
+                <div className="flex flex-col items-center text-center gap-3 min-w-0">
+
+                  <div className="scale-[1.35]">
+                    <TeamBadge
+                      name={normalizeTeamName(
+                        selectedMatch.away_team ||
+                          selectedMatch.tim_away ||
+                          'Away Team'
+                      )}
+                      size="md"
+                    />
+                  </div>
+
+                  <span className="text-sm font-bold text-white leading-tight max-w-[180px]">
+                    {selectedMatch.away_team ||
+                      selectedMatch.tim_away ||
+                      'Away Team'}
+                  </span>
+
+                </div>
+
+              </div>
+
+              {/* ==================================================
+                  STATISTICS CONTENT
+              ================================================== */}
+              {isStatsLoading ? (
+
+                <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-10 flex flex-col items-center justify-center text-center">
+
+                  <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-orange-400 animate-spin mb-4" />
+
+                  <p className="text-sm font-bold text-white">
+                    Memuat statistik...
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-1">
+                    Mengambil data statistik pertandingan
+                  </p>
+
+                </div>
+
+              ) : statsError ? (
+
+                <div className="rounded-2xl bg-red-500/10 border border-red-500/20 p-6 text-center">
+
+                  <div className="mx-auto mb-3 w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-red-400" />
+                  </div>
+
+                  <p className="text-sm font-bold text-red-400">
+                    Gagal memuat statistik
+                  </p>
+
+                  <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                    {statsError}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      fetchMatchStatistics(
+                        selectedMatch
+                      )
+                    }
+                    className="mt-4 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-extrabold transition-all active:scale-95 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+
+                    <span>
+                      Coba Lagi
+                    </span>
+                  </button>
+
+                </div>
+
+              ) : currentStats ? (
+
+                <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+
+                  {/* ==================================================
+                      TABLE HEADER
+                  ================================================== */}
+                  <div className="grid grid-cols-[minmax(0,1fr)_140px_minmax(0,1fr)] sm:grid-cols-[minmax(0,1fr)_180px_minmax(0,1fr)] items-center px-3 sm:px-4 py-3 bg-white/[0.02] border-b border-white/[0.06]">
+
+                    <div className="text-center text-xs font-bold text-white truncate px-2">
+                      {selectedMatch.home_team ||
+                        selectedMatch.tim_home ||
+                        'Home'}
+                    </div>
+
+                    <div className="text-center text-[10px] font-extrabold text-orange-400 uppercase tracking-wider whitespace-nowrap">
+                      Statistik
+                    </div>
+
+                    <div className="text-center text-xs font-bold text-white truncate px-2">
+                      {selectedMatch.away_team ||
+                        selectedMatch.tim_away ||
+                        'Away'}
+                    </div>
+
+                  </div>
+
+                  {/* ==================================================
+                      STATISTIC ROWS
+                  ================================================== */}
+                  {statRows.map(
+                    (stat, index) => (
+                      <div
+                        key={stat.label}
+                        className={[
+                          'grid grid-cols-[minmax(0,1fr)_140px_minmax(0,1fr)]',
+                          'sm:grid-cols-[minmax(0,1fr)_180px_minmax(0,1fr)]',
+                          'items-center',
+                          'px-3 sm:px-4 py-3',
+                          index !==
+                            statRows.length - 1
+                            ? 'border-b border-white/[0.04]'
+                            : '',
+                        ].join(' ')}
+                      >
+
+                        {/* HOME VALUE */}
+                        <div className="flex items-center justify-center min-w-0">
+                          <span
+                            className={[
+                              'inline-flex',
+                              'items-center',
+                              'justify-center',
+                              'min-w-[42px]',
+                              'h-7',
+                              'px-2',
+                              'rounded-lg',
+                              'text-xs',
+                              'font-bold',
+                              'bg-orange-500/10',
+                              'text-orange-400',
+                            ].join(' ')}
+                          >
+                            {stat.values[0]}
+                            {stat.unit || ''}
+                          </span>
+                        </div>
+
+                        {/* CENTER LABEL */}
+                        <div className="flex items-center justify-center min-w-0 px-2">
+                          <span className="text-xs text-slate-300 text-center whitespace-nowrap">
+                            {stat.label}
+                          </span>
+                        </div>
+
+                        {/* AWAY VALUE */}
+                        <div className="flex items-center justify-center min-w-0">
+                          <span
+                            className={[
+                              'inline-flex',
+                              'items-center',
+                              'justify-center',
+                              'min-w-[42px]',
+                              'h-7',
+                              'px-2',
+                              'rounded-lg',
+                              'text-xs',
+                              'font-bold',
+                              'bg-white/[0.04]',
+                              'text-white',
+                            ].join(' ')}
+                          >
+                            {stat.values[1]}
+                            {stat.unit || ''}
+                          </span>
+                        </div>
+
+                      </div>
+                    )
+                  )}
+
+                </div>
+
+              ) : (
+
+                <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-8 text-center">
+
+                  <BarChart3 className="w-8 h-8 mx-auto text-slate-600 mb-3" />
+
+                  <p className="text-sm font-bold text-slate-300">
+                    Statistik belum tersedia
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-1">
+                    Belum ada data statistik untuk pertandingan ini.
+                  </p>
+
+                </div>
+
+              )}
+
+              {/* ==================================================
+                  STATUS
+              ================================================== */}
+              {selectedMatch.status && (
+                <div className="mt-4 text-center">
+                  <span className="inline-flex px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-bold text-slate-400 uppercase">
+                    {selectedMatch.status}
+                  </span>
+                </div>
+              )}
+
+              {/* ==================================================
+                  CLOSE BUTTON
+              ================================================== */}
               <button
                 type="button"
-                onClick={() =>
-                  setShowStatsComingSoon(
-                    false
-                  )
-                }
+                onClick={closeStatistics}
                 className="mt-6 w-full py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-extrabold transition-all active:scale-95 cursor-pointer"
               >
                 Tutup
               </button>
+
             </div>
           </div>,
           document.body
         )
       : null;
 
+  /*
+   * ============================================================
+   * RENDER
+   * ============================================================
+   */
   return (
     <>
-      {/* ========================================================
-          MAIN CONTENT
-      ========================================================= */}
       <div className="space-y-6 animate-pop">
 
         {/* ======================================================
-            HEADER & FILTER
+            HEADER
         ======================================================= */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-[#111827] to-slate-900 border border-white/[0.08]">
 
@@ -630,7 +1234,9 @@ export default function MatchesView({
 
           </div>
 
-          {/* FILTER CONTROLS */}
+          {/* ==================================================
+              FILTERS
+          =================================================== */}
           <div className="flex flex-wrap items-center gap-3">
 
             {/* SEASON */}
@@ -642,9 +1248,9 @@ export default function MatchesView({
 
               <select
                 value={selectedSeason}
-                onChange={(e) =>
+                onChange={(event) =>
                   handleSeasonChange(
-                    e.target.value
+                    event.target.value
                   )
                 }
                 className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-orange-500 cursor-pointer hover:border-white/20 transition-colors font-semibold"
@@ -673,63 +1279,56 @@ export default function MatchesView({
 
               <select
                 value={activeWeek}
-                onChange={(e) =>
+                onChange={(event) =>
                   handleWeekChange(
-                    e.target.value
+                    event.target.value
                   )
                 }
                 className="px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-orange-500 cursor-pointer hover:border-white/20 transition-colors font-semibold"
               >
-
                 <option value="all">
                   Semua Pekan (1-34)
                 </option>
 
                 {Array.from(
                   { length: 34 },
-                  (_, i) => (
+                  (_, index) => (
                     <option
-                      key={i + 1}
+                      key={index + 1}
                       value={String(
-                        i + 1
+                        index + 1
                       )}
                     >
-                      Pekan {i + 1}
+                      Pekan {index + 1}
                     </option>
                   )
                 )}
-
               </select>
 
             </div>
 
           </div>
-
         </div>
 
         {/* ======================================================
-            GRID / LOADING / ERROR
+            LOADING
         ======================================================= */}
         {isLoading ? (
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
             {[1, 2, 3, 4, 5, 6].map(
-              (n) => (
-
+              (number) => (
                 <div
-                  key={n}
+                  key={number}
                   className="p-5 rounded-3xl bg-[#111827]/90 border border-white/[0.07] animate-pulse space-y-4"
                 >
-
                   <div className="h-4 bg-slate-800 rounded w-1/2" />
 
                   <div className="h-12 bg-slate-800 rounded" />
 
                   <div className="h-8 bg-slate-800 rounded" />
-
                 </div>
-
               )
             )}
 
@@ -737,6 +1336,9 @@ export default function MatchesView({
 
         ) : error ? (
 
+          /* ====================================================
+             ERROR
+          ===================================================== */
           <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-center space-y-3">
 
             <p className="text-xs text-red-400 font-semibold">
@@ -744,6 +1346,7 @@ export default function MatchesView({
             </p>
 
             <button
+              type="button"
               onClick={() =>
                 fetchMatchHistory(
                   selectedSeason,
@@ -752,13 +1355,11 @@ export default function MatchesView({
               }
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-xs transition-all active:scale-95 cursor-pointer"
             >
-
               <RefreshCw className="w-3.5 h-3.5" />
 
               <span>
                 Coba Lagi
               </span>
-
             </button>
 
           </div>
@@ -766,6 +1367,9 @@ export default function MatchesView({
         ) : filteredMatches.length ===
           0 ? (
 
+          /* ====================================================
+             EMPTY
+          ===================================================== */
           <div className="p-8 rounded-3xl bg-[#111827] border border-white/[0.08] text-center text-slate-400 text-xs">
             Tidak ada data
             pertandingan untuk Musim{' '}
@@ -775,10 +1379,13 @@ export default function MatchesView({
 
         ) : (
 
+          /* ====================================================
+             MATCH GRID
+          ===================================================== */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
             {filteredMatches.map(
-              (match, idx) => {
+              (match, index) => {
 
                 const homeTeam =
                   match.home_team ||
@@ -795,19 +1402,28 @@ export default function MatchesView({
                   match.stadion ||
                   'Stadion TBD';
 
-                const dateDisplay =
+                const matchDate =
+                  match.match_date ||
+                  match.tanggal ||
+                  '';
+
+                const matchTime =
+                  match.match_time ||
+                  '';
+
+                const formattedDate =
                   formatMatchDate(
-                    match.match_date ||
-                      match.tanggal,
-                    match.match_time
+                    matchDate
                   );
 
+                /*
+                 * SCORE
+                 */
                 let scoreDisplay =
                   match.skor;
 
                 if (!scoreDisplay) {
-
-                  const hs =
+                  const homeScore =
                     match.home_score !==
                       null &&
                     match.home_score !==
@@ -815,7 +1431,7 @@ export default function MatchesView({
                       ? match.home_score
                       : '-';
 
-                  const as =
+                  const awayScore =
                     match.away_score !==
                       null &&
                     match.away_score !==
@@ -823,7 +1439,8 @@ export default function MatchesView({
                       ? match.away_score
                       : '-';
 
-                  scoreDisplay = `${hs} : ${as}`;
+                  scoreDisplay =
+                    `${homeScore} : ${awayScore}`;
                 }
 
                 return (
@@ -831,33 +1448,57 @@ export default function MatchesView({
                     key={
                       match._id ||
                       match.id ||
-                      `${homeTeam}-${awayTeam}-${idx}`
+                      `${homeTeam}-${awayTeam}-${index}`
                     }
                     className="p-5 rounded-3xl bg-[#111827] border border-white/[0.08] hover:border-orange-500/40 hover:-translate-y-1 transition-all duration-300 space-y-4 shadow-xl group flex flex-col justify-between"
                   >
 
-                    {/* MATCH HEADER */}
-                    <div className="flex items-center justify-between text-xs text-slate-400 border-b border-white/[0.06] pb-3">
+                    {/* ==================================================
+                        MATCH HEADER
+                    ================================================== */}
+                    <div className="flex items-start justify-between gap-3 text-xs border-b border-white/[0.06] pb-3">
 
-                      <span className="font-bold text-orange-400">
-                        Pekan{' '}
-                        {match.week ||
-                          match.pekan ||
-                          activeWeek}{' '}
-                        •{' '}
-                        {dateDisplay ||
-                          match.match_date ||
-                          match.tanggal ||
-                          '-'}
-                      </span>
+                      {/* DATE + TIME */}
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
 
-                      <span className="text-[11px] text-slate-400 truncate max-w-[140px]">
+                        <span className="text-slate-300">
+                          {formattedDate ||
+                            matchDate ||
+                            '-'}
+                        </span>
+
+                        {matchTime && (
+                          <span className="text-slate-600">
+                            •
+                          </span>
+                        )}
+
+                        {matchTime && (
+                          <span className="inline-flex items-center gap-1 font-bold text-orange-400">
+
+                            <span>
+                              {matchTime}
+                            </span>
+
+                            <span className="text-[10px] text-orange-400">
+                              WIB
+                            </span>
+
+                          </span>
+                        )}
+
+                      </div>
+
+                      {/* STADIUM */}
+                      <span className="text-[11px] text-slate-400 truncate max-w-[140px] text-right">
                         {stadium}
                       </span>
 
                     </div>
 
-                    {/* TEAMS + SCORE */}
+                    {/* ==================================================
+                        TEAMS + SCORE
+                    ================================================== */}
                     <div className="grid grid-cols-3 items-center text-center py-1">
 
                       {/* HOME */}
@@ -884,11 +1525,9 @@ export default function MatchesView({
                         </div>
 
                         {match.status && (
-
                           <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
                             {match.status}
                           </span>
-
                         )}
 
                       </div>
@@ -911,23 +1550,23 @@ export default function MatchesView({
 
                     </div>
 
-                    {/* STATISTICS BUTTON */}
+                    {/* ==================================================
+                        STATISTICS BUTTON
+                    ================================================== */}
                     <button
                       type="button"
                       onClick={() =>
-                        setShowStatsComingSoon(
-                          true
+                        openMatchStatistics(
+                          match
                         )
                       }
                       className="w-full py-2.5 rounded-xl bg-white/[0.05] hover:bg-orange-500 hover:text-slate-950 text-slate-200 text-xs font-extrabold border border-white/10 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer active:scale-95"
                     >
-
                       <BarChart3 className="w-3.5 h-3.5" />
 
                       <span>
                         Lihat Statistik Laga
                       </span>
-
                     </button>
 
                   </div>
@@ -936,16 +1575,14 @@ export default function MatchesView({
             )}
 
           </div>
-
         )}
 
       </div>
 
       {/* ========================================================
-          PORTAL MODAL
+          STATISTICS MODAL PORTAL
       ========================================================= */}
-      {statsComingSoonModal}
-
+      {matchStatsModal}
     </>
   );
 }
