@@ -173,9 +173,9 @@ const TRANSLATIONS: Record<string, any> = {
       addressLine2: 'Jl. Mayjen Sungkono No. 178, Sawahan',
       addressCity: 'Kota Surabaya, Jawa Timur 60225',
       contactTitle: 'Hubungi Kami',
-      phone: '+62 (031) 8901-2345',
+      phone: '+62 (085) 645-075-646',
       whatsapp: '+62 856-4507-5646',
-      email: 'scouting@sibundar.id',
+      email: 'sibundarid@gmail.com',
       quickLinks: 'Tautan Cepat',
       servicesTitle: 'Layanan & Paket',
       socialTitle: 'Media Sosial',
@@ -333,7 +333,7 @@ const TRANSLATIONS: Record<string, any> = {
       contactTitle: 'Contact Us',
       phone: '+62 (031) 8901-2345',
       whatsapp: '+62 812-3456-7890',
-      email: 'scouting@sibundar.id',
+      email: 'sibundarid@gmail.com',
       quickLinks: 'Quick Links',
       servicesTitle: 'Services & Packages',
       socialTitle: 'Connect With Us',
@@ -1658,7 +1658,7 @@ export default function App() {
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:scouting@sibundar.id" className="flex items-center gap-2 text-slate-300 hover:text-orange-400 transition-colors">
+                  <a href="mailto:sibundarid@gmail.com" className="flex items-center gap-2 text-slate-300 hover:text-orange-400 transition-colors">
                     <Mail className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                     <span>{t.footer.email}</span>
                   </a>
@@ -1712,7 +1712,7 @@ export default function App() {
 
               <div className="flex flex-wrap gap-2 pt-1">
                 {[
-                  { name: 'Instagram', icon: InstagramIcon, color: 'hover:bg-pink-600 hover:text-white', url: '#' },
+                  { name: 'Instagram', icon: InstagramIcon, color: 'hover:bg-pink-600 hover:text-white', url: 'https://www.instagram.com/sibundarid' },
                   { name: 'YouTube', icon: YoutubeIcon, color: 'hover:bg-red-600 hover:text-white', url: '#' },
                   { name: 'Twitter / X', icon: TwitterIcon, color: 'hover:bg-sky-500 hover:text-white', url: '#' },
                   { name: 'Facebook', icon: FacebookIcon, color: 'hover:bg-blue-600 hover:text-white', url: '#' },
