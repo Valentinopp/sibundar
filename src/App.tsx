@@ -171,7 +171,7 @@ const TRANSLATIONS: Record<string, any> = {
       officeTitle: 'Kantor Pusat Surabaya',
       addressLine1: 'Jl. Puri Sukolilo Selatan III No. 18 Surabaya',
       addressLine2: '',
-      addressCity: 'Kota Surabaya, Jawa Timur, 601119',
+      addressCity: 'Kota Surabaya, Jawa Timur, 60119',
       contactTitle: 'Hubungi Kami',
       phone: '+62 (085) 645-075-646',
       whatsapp: '+62 856-4507-5646',
