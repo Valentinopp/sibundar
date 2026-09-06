@@ -751,9 +751,11 @@ export default function DashboardView({
 
               </div>
 
-              <span className="text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                {t.standings.matchday}
-              </span>
+              {String(t.standings.matchday || '').trim() && (
+                <span className="text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                  {t.standings.matchday}
+                </span>
+              )}
 
             </div>
 
@@ -907,9 +909,11 @@ export default function DashboardView({
                                   className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded text-[8px] font-bold flex items-center justify-center transition-transform hover:scale-125 ${
                                     res === 'W'
                                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                      : res === 'D'
-                                        ? 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
-                                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                      : res === 'L'
+                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        : res === 'D' || res === '-'
+                                          ? 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
+                                          : 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
                                   }`}
                                 >
                                   {res}
