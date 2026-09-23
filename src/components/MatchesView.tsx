@@ -6,6 +6,10 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  CircleDot,
+  Repeat2,
   Calendar,
   BarChart3,
   RefreshCw,
@@ -13,6 +17,7 @@ import {
 } from 'lucide-react';
 
 interface MatchRecord {
+  match_id?: string;
   id?: string;
   _id?: string;
 
@@ -55,16 +60,44 @@ interface TeamStatistics {
   corners: number;
 }
 
-interface MatchStatisticsResponse {
+interface MatchEvent {
+  player: string;
+  minute: string;
+  team: string;
+}
+
+interface SubstitutionEvent {
+  player_out: string;
+  player_in: string;
+  minute: string;
+  team: string;
+}
+
+interface MatchDetailsResponse {
   match_id: string;
-  home_team_stats: TeamStatistics;
-  away_team_stats: TeamStatistics;
+  home_team: string;
+  away_team: string;
+  home_score: number;
+  away_score: number;
+  status: string;
+  statistics: {
+    home_team_stats: TeamStatistics;
+    away_team_stats: TeamStatistics;
+  } | null;
+  events: {
+    goals: MatchEvent[];
+    yellow_cards: MatchEvent[];
+    red_cards: MatchEvent[];
+    substitutions: SubstitutionEvent[];
+  } | null;
 }
 
 interface MatchStats {
   shots: [number, number];
   shotsOnTarget: [number, number];
   possession: [number, number];
+  passes: [number, number];
+  passAccuracy: [number, number];
   fouls: [number, number];
   yellowCards: [number, number];
   redCards: [number, number];
@@ -95,6 +128,12 @@ export interface MatchesViewProps {
     timeStr?: string
   ) => string;
 }
+
+// Reuse requests across tab remounts; refresh after one minute.
+const weekRequestCache = new Map<string, {
+  expiresAt: number;
+  request: Promise<MatchRecord[]>;
+}>();
 
 export default function MatchesView({
   selectedPekan: externalSelectedPekan,
@@ -134,11 +173,11 @@ export default function MatchesView({
   const [internalWeek, setInternalWeek] =
     useState<string>('1');
 
-  const autoWeekSyncedRef =
-    useRef(false);
+  const [resolvedSeason, setResolvedSeason] = useState<string | null>(null);
+  const historyRequestRef = useRef(0);
 
   const activeWeek =
-    externalSelectedPekan || internalWeek;
+    externalSetSelectedPekan ? (externalSelectedPekan || internalWeek) : internalWeek;
 
   /*
    * ============================================================
@@ -192,343 +231,163 @@ export default function MatchesView({
     matchStatistics,
     setMatchStatistics,
   ] =
-    useState<MatchStatisticsResponse | null>(
+    useState<MatchDetailsResponse | null>(
       null
     );
+
+  const detailsRequestRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => detailsRequestRef.current?.abort(), []);
 
   /*
    * ============================================================
    * GET MATCHES PER WEEK
    * ============================================================
    */
-  const getWeekMatches = async (
+  const getWeekMatches = (
     season: string,
     week: number
   ): Promise<MatchRecord[]> => {
-    try {
-      const response = await fetch(
-        `https://sibundar-api.vercel.app/usr/match/match_history?season=${encodeURIComponent(
-          season
-        )}&week=${week}&_t=${Date.now()}`,
-        {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control':
-              'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        return [];
-      }
-
-      const data =
-        await response.json();
-
-      if (Array.isArray(data)) {
-        return data;
-      }
-
-      if (
-        data &&
-        typeof data === 'object'
-      ) {
-        if (Array.isArray(data.matches)) {
-          return data.matches;
-        }
-
-        if (Array.isArray(data.data)) {
-          return data.data;
-        }
-
-        if (Array.isArray(data.result)) {
-          return data.result;
-        }
-      }
-    } catch (err) {
-      console.warn(
-        `Gagal mengecek Pekan ${week}:`,
-        err
-      );
-    }
-
-    return [];
-  };
-
-  /*
-   * ============================================================
-   * GET LATEST WEEK
-   * ============================================================
-   */
-  const getLatestWeekForSeason = async (
-    season: string
-  ): Promise<string> => {
-    const today = new Date();
-
-    const weekResults = await Promise.all(
-      Array.from(
-        { length: 34 },
-        (_, index) =>
-          getWeekMatches(
-            season,
-            index + 1
-          )
-      )
-    );
-
-    let latestWeek = 1;
-
-    weekResults.forEach(
-      (weekMatches, index) => {
-        const weekNumber =
-          index + 1;
-
-        const hasStarted =
-          weekMatches.some((match) => {
-            const dateValue =
-              match.match_date ||
-              match.tanggal;
-
-            if (!dateValue) {
-              return false;
-            }
-
-            const matchDate =
-              new Date(
-                `${dateValue}T00:00:00`
-              );
-
-            return (
-              !Number.isNaN(
-                matchDate.getTime()
-              ) &&
-              matchDate <= today
-            );
-          });
-
-        if (hasStarted) {
-          latestWeek = Math.max(
-            latestWeek,
-            weekNumber
-          );
-        }
-      }
-    );
-
-    return String(
-      Math.min(
-        Math.max(latestWeek, 1),
-        34
-      )
-    );
-  };
-
-  /*
-   * ============================================================
-   * SEASON CHANGE
-   * ============================================================
-   */
-  const handleSeasonChange = async (
-    season: string
-  ) => {
-    setSelectedSeason(season);
-
-    const latestWeek =
-      await getLatestWeekForSeason(
-        season
-      );
-
-    if (externalSetSelectedPekan) {
-      externalSetSelectedPekan(
-        latestWeek
-      );
-    } else {
-      setInternalWeek(latestWeek);
-    }
-  };
-
-  /*
-   * ============================================================
-   * WEEK CHANGE
-   * ============================================================
-   */
-  const handleWeekChange = (
-    week: string
-  ) => {
-    if (externalSetSelectedPekan) {
-      externalSetSelectedPekan(week);
-    } else {
-      setInternalWeek(week);
-    }
-  };
-
-  /*
-   * ============================================================
-   * FETCH MATCH HISTORY
-   * ============================================================
-   */
-  const fetchMatchHistory = async (
-    season: string,
-    week: string
-  ) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const targetWeek =
-        week === 'all'
-          ? '1'
-          : week;
-
-      const response = await fetch(
-        `https://sibundar-api.vercel.app/usr/match/match_history?season=${encodeURIComponent(
-          season
-        )}&week=${encodeURIComponent(
-          targetWeek
-        )}&_t=${Date.now()}`,
-        {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control':
-              'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `HTTP ${response.status}: Gagal mengambil data histori pertandingan`
+    const key = `${season}:${week}`;
+    const cached = weekRequestCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.request;
+    const entry = {
+      expiresAt: Infinity,
+      request: Promise.resolve([] as MatchRecord[]),
+    };
+    entry.request = (async () => {
+      try {
+        const response = await fetch(
+          `https://sibundar-api.vercel.app/usr/match/match_history?season=${encodeURIComponent(season)}&week=${week}`,
+          { cache: 'no-store' }
         );
+        if (!response.ok) throw new Error(`HTTP ${response.status}: Gagal mengambil Pekan ${week}`);
+        const data = await response.json();
+        const result = Array.isArray(data) ? data : data?.matches ?? data?.data ?? data?.result;
+        if (!Array.isArray(result)) throw new Error('Format daftar pertandingan tidak valid.');
+        entry.expiresAt = Date.now() + 60_000;
+        return result as MatchRecord[];
+      } catch (err) {
+        if (weekRequestCache.get(key) === entry) weekRequestCache.delete(key);
+        throw err;
       }
+    })();
+    weekRequestCache.set(key, entry);
+    return entry.request;
+  };
 
-      const data =
-        await response.json();
+  const getLatestWeekForSeason = async (season: string): Promise<string> => {
+    // Existing API requires a week. Reuse these same results for the chosen week.
+    const results = await Promise.all(
+      Array.from({ length: 34 }, (_, index) => getWeekMatches(season, index + 1))
+    );
+    const today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date());
+    let latestWeek = 0;
+    results.forEach((weekMatches, index) => {
+      const hasStarted = weekMatches.some(match => {
+        const date = (match.match_date || match.tanggal || '').slice(0, 10);
+        return /^\d{4}-\d{2}-\d{2}$/.test(date) && date <= today;
+      });
+      if (hasStarted) latestWeek = index + 1;
+    });
+    // Before the season begins, show its first available match week.
+    return String(latestWeek || Math.max(1, results.findIndex(items => items.length > 0) + 1));
+  };
 
-      let matchData: MatchRecord[] =
-        [];
+  const handleSeasonChange = (season: string) => {
+    if (season === selectedSeason) return;
+    historyRequestRef.current += 1;
+    setResolvedSeason(null);
+    setIsLoading(true);
+    setError(null);
+    setSelectedSeason(season);
+  };
 
-      if (Array.isArray(data)) {
-        matchData = data;
-      } else if (
-        data &&
-        typeof data === 'object'
-      ) {
-        if (
-          Array.isArray(data.matches)
-        ) {
-          matchData =
-            data.matches;
-        } else if (
-          Array.isArray(data.data)
-        ) {
-          matchData =
-            data.data;
-        } else if (
-          Array.isArray(data.result)
-        ) {
-          matchData =
-            data.result;
-        }
+  const handleWeekChange = (week: string) => {
+    historyRequestRef.current += 1;
+    setInternalWeek(week);
+    externalSetSelectedPekan?.(week);
+  };
+
+  const fetchMatchHistory = async (season: string, week: string) => {
+    const requestId = ++historyRequestRef.current;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = week === 'all'
+        ? (await Promise.all(Array.from({ length: 34 }, (_, i) => getWeekMatches(season, i + 1)))).flat()
+        : await getWeekMatches(season, Number(week));
+      if (requestId === historyRequestRef.current) setMatches(data);
+    } catch (err: unknown) {
+      if (requestId === historyRequestRef.current) {
+        setError(err instanceof Error ? err.message : 'Gagal mengambil daftar pertandingan.');
       }
-
-      setMatches(matchData);
-    } catch (err: any) {
-      console.error(
-        'Error fetching match history:',
-        err
-      );
-
-      setError(
-        err?.message ||
-          'Gagal terhubung ke API'
-      );
     } finally {
+      if (requestId === historyRequestRef.current) setIsLoading(false);
+    }
+  };
+
+  const resolveLatestWeek = async (season: string, isCancelled: () => boolean) => {
+    const requestId = ++historyRequestRef.current;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const latestWeek = await getLatestWeekForSeason(season);
+      if (isCancelled() || requestId !== historyRequestRef.current) return;
+      setInternalWeek(latestWeek);
+      externalSetSelectedPekan?.(latestWeek);
+      setResolvedSeason(season);
+    } catch (err: unknown) {
+      if (isCancelled() || requestId !== historyRequestRef.current) return;
+      setError(err instanceof Error ? err.message : 'Gagal menentukan pekan terbaru.');
       setIsLoading(false);
     }
   };
 
-  /*
-   * ============================================================
-   * FETCH MATCH STATISTICS
-   *
-   * Endpoint:
-   * /usr/match/statistic/{match_id}
-   *
-   * match_id diambil langsung dari:
-   * selectedMatch._id atau selectedMatch.id
-   * ============================================================
-   */
-  const fetchMatchStatistics = async (
-    match: MatchRecord
-  ) => {
-    const matchId =
-      match._id || match.id;
+  // GET /usr/match/{match_id}/details
+  const fetchMatchDetails = async (match: MatchRecord) => {
+    detailsRequestRef.current?.abort();
+    const controller = new AbortController();
+    detailsRequestRef.current = controller;
+    setStatsError(null);
+    setMatchStatistics(null);
+    setIsStatsLoading(false);
 
+    const matchId = match.match_id || match._id || match.id;
     if (!matchId) {
-      setStatsError(
-        'ID pertandingan tidak ditemukan.'
-      );
+      setStatsError('ID pertandingan tidak ditemukan.');
       return;
     }
 
     try {
       setIsStatsLoading(true);
-      setStatsError(null);
-      setMatchStatistics(null);
-
       const response = await fetch(
-        `https://sibundar-api.vercel.app/usr/match/statistic/${encodeURIComponent(
-          matchId
-        )}?_t=${Date.now()}`,
-        {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control':
-              'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-          },
-        }
+        `https://sibundar-api.vercel.app/usr/match/${encodeURIComponent(matchId)}/details`,
+        { cache: 'no-store', signal: controller.signal }
       );
-
       if (!response.ok) {
-        throw new Error(
-          `HTTP ${response.status}: Gagal mengambil statistik pertandingan`
-        );
+        throw new Error(`HTTP ${response.status}: Gagal mengambil detail pertandingan`);
       }
-
-      const data =
-        (await response.json()) as MatchStatisticsResponse;
-
-      /*
-       * Validasi response sederhana agar UI
-       * tidak mencoba membaca struktur yang salah.
-       */
+      const data = (await response.json()) as MatchDetailsResponse;
       if (
-        !data ||
-        !data.home_team_stats ||
-        !data.away_team_stats
+        !data || typeof data.match_id !== 'string' ||
+        typeof data.home_team !== 'string' || typeof data.away_team !== 'string' ||
+        typeof data.home_score !== 'number' || typeof data.away_score !== 'number' ||
+        typeof data.status !== 'string' ||
+        (data.statistics != null &&
+          (!data.statistics.home_team_stats || !data.statistics.away_team_stats))
       ) {
-        throw new Error(
-          'Format data statistik dari API tidak valid.'
-        );
+        throw new Error('Format data detail pertandingan dari API tidak valid.');
       }
-
+      if (controller.signal.aborted) return;
       setMatchStatistics(data);
-    } catch (err: any) {
-      console.error(
-        'Error fetching match statistics:',
-        err
-      );
-
-      setStatsError(
-        err?.message ||
-          'Gagal mengambil statistik pertandingan.'
-      );
+    } catch (err: unknown) {
+      if (controller.signal.aborted) return;
+      setStatsError(err instanceof Error ? err.message : 'Gagal mengambil detail pertandingan.');
     } finally {
-      setIsStatsLoading(false);
+      if (!controller.signal.aborted) setIsStatsLoading(false);
     }
   };
 
@@ -547,7 +406,7 @@ export default function MatchesView({
      * Ambil statistik berdasarkan ID
      * pertandingan yang diklik.
      */
-    fetchMatchStatistics(match);
+    fetchMatchDetails(match);
   };
 
   /*
@@ -556,6 +415,7 @@ export default function MatchesView({
    * ============================================================
    */
   const closeStatistics = () => {
+    detailsRequestRef.current?.abort();
     setShowMatchStats(false);
     setSelectedMatch(null);
     setMatchStatistics(null);
@@ -563,68 +423,21 @@ export default function MatchesView({
     setIsStatsLoading(false);
   };
 
-  /*
-   * ============================================================
-   * AUTO DETECT LATEST WEEK
-   * ============================================================
-   */
+  // Resolve the initial week before fetching/rendering the selected list.
   useEffect(() => {
     let cancelled = false;
-
-    autoWeekSyncedRef.current =
-      false;
-
-    const resolveLatestWeek =
-      async () => {
-        const latestWeek =
-          await getLatestWeekForSeason(
-            selectedSeason
-          );
-
-        if (
-          cancelled ||
-          autoWeekSyncedRef.current
-        ) {
-          return;
-        }
-
-        autoWeekSyncedRef.current =
-          true;
-
-        if (
-          externalSetSelectedPekan
-        ) {
-          externalSetSelectedPekan(
-            latestWeek
-          );
-        } else {
-          setInternalWeek(
-            latestWeek
-          );
-        }
-      };
-
-    resolveLatestWeek();
-
+    setResolvedSeason(null);
+    void resolveLatestWeek(selectedSeason, () => cancelled);
     return () => {
       cancelled = true;
+      historyRequestRef.current += 1;
     };
   }, [selectedSeason]);
 
-  /*
-   * ============================================================
-   * FETCH WHEN SEASON / WEEK CHANGES
-   * ============================================================
-   */
   useEffect(() => {
-    fetchMatchHistory(
-      selectedSeason,
-      activeWeek
-    );
-  }, [
-    selectedSeason,
-    activeWeek,
-  ]);
+    if (resolvedSeason !== selectedSeason) return;
+    void fetchMatchHistory(selectedSeason, activeWeek);
+  }, [selectedSeason, activeWeek, resolvedSeason]);
 
   /*
    * ============================================================
@@ -725,72 +538,82 @@ export default function MatchesView({
    *
    * API:
    *
-   * home_team_stats
-   * away_team_stats
+   * statistics.home_team_stats
+   * statistics.away_team_stats
    *
-   * Passes dan pass_accuracy sengaja
-   * tidak dimasukkan ke tabel.
+   * Seluruh 10 statistik API ditampilkan untuk kedua tim.
    */
+  const statistics = matchStatistics?.statistics;
   const currentStats: MatchStats | null =
-    matchStatistics
+    statistics
       ? {
           shots: [
-            matchStatistics
+            statistics
               .home_team_stats.shots,
-            matchStatistics
+            statistics
               .away_team_stats.shots,
           ],
 
           shotsOnTarget: [
-            matchStatistics
+            statistics
               .home_team_stats
               .shots_on_target,
-            matchStatistics
+            statistics
               .away_team_stats
               .shots_on_target,
           ],
 
           possession: [
-            matchStatistics
+            statistics
               .home_team_stats.possession,
-            matchStatistics
+            statistics
               .away_team_stats.possession,
           ],
 
+          passes: [
+            statistics.home_team_stats.passes,
+            statistics.away_team_stats.passes,
+          ],
+
+          passAccuracy: [
+            statistics.home_team_stats.pass_accuracy,
+            statistics.away_team_stats.pass_accuracy,
+          ],
+
           fouls: [
-            matchStatistics
+            statistics
               .home_team_stats.fouls,
-            matchStatistics
+            statistics
               .away_team_stats.fouls,
           ],
 
           yellowCards: [
-            matchStatistics
+            statistics
               .home_team_stats
               .yellow_cards,
-            matchStatistics
+            statistics
               .away_team_stats
               .yellow_cards,
           ],
 
           redCards: [
-            matchStatistics
+            statistics
               .home_team_stats.red_cards,
-            matchStatistics
+            statistics
               .away_team_stats.red_cards,
           ],
 
           offsides: [
-            matchStatistics
+            statistics
               .home_team_stats.offsides,
-            matchStatistics
+            statistics
               .away_team_stats.offsides,
           ],
 
           corners: [
-            matchStatistics
+            statistics
               .home_team_stats.corners,
-            matchStatistics
+            statistics
               .away_team_stats.corners,
           ],
         }
@@ -805,43 +628,52 @@ export default function MatchesView({
     currentStats
       ? [
           {
-            label: 'Shots',
+            label: 'Tembakan',
             values:
               currentStats.shots,
           },
           {
-            label: 'Shots on target',
+            label: 'Tepat sasaran',
             values:
               currentStats.shotsOnTarget,
           },
           {
-            label: 'Possession',
+            label: 'Penguasaan bola',
             values:
               currentStats.possession,
             unit: '%',
           },
           {
-            label: 'Fouls',
+            label: 'Jumlah operan',
+            values: currentStats.passes,
+          },
+          {
+            label: 'Akurasi operan',
+            values: currentStats.passAccuracy,
+            unit: '%',
+          },
+          {
+            label: 'Pelanggaran',
             values:
               currentStats.fouls,
           },
           {
-            label: 'Yellow cards',
+            label: 'Kartu kuning',
             values:
               currentStats.yellowCards,
           },
           {
-            label: 'Red cards',
+            label: 'Kartu merah',
             values:
               currentStats.redCards,
           },
           {
-            label: 'Offsides',
+            label: 'Offside',
             values:
               currentStats.offsides,
           },
           {
-            label: 'Corners',
+            label: 'Sepak pojok',
             values:
               currentStats.corners,
           },
@@ -853,9 +685,48 @@ export default function MatchesView({
    * STATISTICS MODAL
    * ============================================================
    */
+  const detailMatch = selectedMatch
+    ? { ...selectedMatch, ...(matchStatistics ?? {}) }
+    : null;
+  const homeName = detailMatch?.home_team || detailMatch?.tim_home || 'Home';
+  const awayName = detailMatch?.away_team || detailMatch?.tim_away || 'Away';
+  const teamKey = (value: string) =>
+    value.trim().toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+  const eventSide = (team: string): 'home' | 'away' | 'unknown' => {
+    const key = teamKey(team);
+    if (key === 'home' || key === teamKey(homeName)) return 'home';
+    if (key === 'away' || key === teamKey(awayName)) return 'away';
+    const normalized = teamKey(normalizeTeamName(team));
+    const home = normalized === teamKey(normalizeTeamName(homeName));
+    const away = normalized === teamKey(normalizeTeamName(awayName));
+    return normalized && home !== away ? (home ? 'home' : 'away') : 'unknown';
+  };
+  type TimelineEvent = {
+    kind: 'goal' | 'yellow' | 'red' | 'substitution';
+    label: string;
+    event: MatchEvent | SubstitutionEvent;
+  };
+  const timeline: TimelineEvent[] = [
+    ...(matchStatistics?.events?.goals ?? []).map(event => ({ kind: 'goal' as const, label: 'Gol', event })),
+    ...(matchStatistics?.events?.yellow_cards ?? []).map(event => ({ kind: 'yellow' as const, label: 'Kartu kuning', event })),
+    ...(matchStatistics?.events?.red_cards ?? []).map(event => ({ kind: 'red' as const, label: 'Kartu merah', event })),
+    ...(matchStatistics?.events?.substitutions ?? []).map(event => ({ kind: 'substitution' as const, label: 'Pergantian', event })),
+  ];
+  // Sort stoppage time after its base minute and before the following minute.
+  const minuteParts = (minute: string) => {
+    const match = String(minute).match(/(\d+)(?:\s*\+\s*(\d+))?/);
+    return match ? [Number(match[1]), Number(match[2] || 0)] : [Infinity, 0];
+  };
+  timeline.sort((a, b) => {
+    const left = minuteParts(a.event.minute);
+    const right = minuteParts(b.event.minute);
+    return left[0] - right[0] || left[1] - right[1];
+  });
+
+
   const matchStatsModal =
     showMatchStats &&
-    selectedMatch &&
+    detailMatch &&
     typeof document !== 'undefined'
       ? createPortal(
           <div
@@ -870,7 +741,7 @@ export default function MatchesView({
 
             {/* MODAL */}
             <div
-              className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#111827] border border-white/[0.08] shadow-2xl p-5 sm:p-7 animate-pop"
+              className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#111827] border border-white/[0.08] shadow-2xl p-5 sm:p-7 animate-pop"
               onClick={(event) =>
                 event.stopPropagation()
               }
@@ -898,25 +769,25 @@ export default function MatchesView({
                   id="match-stats-title"
                   className="text-lg sm:text-xl font-extrabold text-white"
                 >
-                  Statistik Pertandingan
+                  Detail Pertandingan
                 </h3>
 
                 <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
 
                   <span className="text-slate-400">
-                    {selectedMatch.match_date ||
-                      selectedMatch.tanggal ||
+                    {detailMatch.match_date ||
+                      detailMatch.tanggal ||
                       '-'}
                   </span>
 
-                  {selectedMatch.match_time && (
+                  {detailMatch.match_time && (
                     <>
                       <span className="text-slate-600">
                         •
                       </span>
 
                       <span className="font-bold text-orange-400">
-                        {selectedMatch.match_time} WIB
+                        {detailMatch.match_time} WIB
                       </span>
                     </>
                   )}
@@ -927,7 +798,7 @@ export default function MatchesView({
               {/* ==================================================
                   TEAMS
               ================================================== */}
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 mb-8">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 mb-6 rounded-2xl border border-white/[0.08] bg-gradient-to-b from-slate-800/60 to-slate-900/40 px-3 py-6 sm:px-6">
 
                 {/* HOME */}
                 <div className="flex flex-col items-center text-center gap-3 min-w-0">
@@ -935,19 +806,20 @@ export default function MatchesView({
                   <div className="scale-[1.35]">
                     <TeamBadge
                       name={normalizeTeamName(
-                        selectedMatch.home_team ||
-                          selectedMatch.tim_home ||
+                        detailMatch.home_team ||
+                          detailMatch.tim_home ||
                           'Home Team'
                       )}
                       size="md"
                     />
                   </div>
 
-                  <span className="text-sm font-bold text-white leading-tight max-w-[180px]">
-                    {selectedMatch.home_team ||
-                      selectedMatch.tim_home ||
+                  <span className="text-xs sm:text-sm font-bold text-white leading-relaxed max-w-[180px] break-words">
+                    {detailMatch.home_team ||
+                      detailMatch.tim_home ||
                       'Home Team'}
                   </span>
+                  <span className="text-[10px] font-semibold tracking-widest uppercase text-orange-300">Home</span>
 
                 </div>
 
@@ -955,14 +827,14 @@ export default function MatchesView({
                 <div className="flex flex-col items-center justify-center shrink-0">
 
                   <span className="text-[10px] font-bold text-slate-500 uppercase">
-                    VS
+                    SKOR
                   </span>
 
-                  <span className="mt-1 text-lg font-black text-white">
-                    {selectedMatch.home_score ??
+                  <span className="mt-1 text-3xl sm:text-4xl font-black tracking-tight tabular-nums text-white">
+                    {detailMatch.home_score ??
                       '-'}
                     {' : '}
-                    {selectedMatch.away_score ??
+                    {detailMatch.away_score ??
                       '-'}
                   </span>
 
@@ -974,23 +846,55 @@ export default function MatchesView({
                   <div className="scale-[1.35]">
                     <TeamBadge
                       name={normalizeTeamName(
-                        selectedMatch.away_team ||
-                          selectedMatch.tim_away ||
+                        detailMatch.away_team ||
+                          detailMatch.tim_away ||
                           'Away Team'
                       )}
                       size="md"
                     />
                   </div>
 
-                  <span className="text-sm font-bold text-white leading-tight max-w-[180px]">
-                    {selectedMatch.away_team ||
-                      selectedMatch.tim_away ||
+                  <span className="text-xs sm:text-sm font-bold text-white leading-relaxed max-w-[180px] break-words">
+                    {detailMatch.away_team ||
+                      detailMatch.tim_away ||
                       'Away Team'}
                   </span>
+                  <span className="text-[10px] font-semibold tracking-widest uppercase text-sky-300">Away</span>
 
                 </div>
 
               </div>
+
+              {!isStatsLoading && !statsError && matchStatistics && (
+                <section aria-label="Pencetak gol" className="-mt-3 mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-3 py-4 sm:px-6">
+                  <div className="flex items-center justify-center gap-2 mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="w-4 h-4 shrink-0 text-slate-300" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><circle cx="12" cy="12" r="9.5" /><path d="m12 7 4.8 3.5-1.8 5.6H9l-1.8-5.6Z" fill="currentColor" /><path d="M12 7V2.5m4.8 8 4.3-1.4M15 16.1l2.6 3.6M9 16.1l-2.6 3.6m.8-9.2L2.9 9.1" /></svg>
+                    Pencetak gol
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 sm:gap-8">
+                    {(['home', 'away'] as const).map(side => {
+                      const goals = timeline.filter(item => item.kind === 'goal' && eventSide(item.event.team) === side);
+                      return (
+                        <div key={side} className={`min-w-0 ${side === 'away' ? 'text-right' : 'text-left'}`}>
+                          <span className="sr-only">{side === 'home' ? homeName : awayName}</span>
+                          {goals.length > 0 ? (
+                            <ul className="space-y-2">
+                              {goals.map(({ event }, index) => (
+                                <li key={`${event.minute}-${index}`} className={`flex items-baseline gap-2 text-xs sm:text-sm ${side === 'away' ? 'flex-row-reverse' : ''}`}>
+                                  <span className={`shrink-0 font-bold tabular-nums ${side === 'home' ? 'text-orange-300' : 'text-sky-300'}`}>
+                                    {String(event.minute).trim() ? `${String(event.minute).replace(/['′’]+$/, '')}′` : '—'}
+                                  </span>
+                                  <span className="min-w-0 font-medium text-slate-200 break-words leading-relaxed">{'player' in event ? event.player : ''}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : <p className="text-xs text-slate-500">Belum ada pencetak gol tercatat.</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               {/* ==================================================
                   STATISTICS CONTENT
@@ -1002,11 +906,11 @@ export default function MatchesView({
                   <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-orange-400 animate-spin mb-4" />
 
                   <p className="text-sm font-bold text-white">
-                    Memuat statistik...
+                    Memuat detail pertandingan...
                   </p>
 
                   <p className="text-xs text-slate-500 mt-1">
-                    Mengambil data statistik pertandingan
+                    Mengambil statistik dan kejadian pertandingan
                   </p>
 
                 </div>
@@ -1020,7 +924,7 @@ export default function MatchesView({
                   </div>
 
                   <p className="text-sm font-bold text-red-400">
-                    Gagal memuat statistik
+                    Gagal memuat detail pertandingan
                   </p>
 
                   <p className="mt-2 text-xs text-slate-400 leading-relaxed">
@@ -1030,8 +934,8 @@ export default function MatchesView({
                   <button
                     type="button"
                     onClick={() =>
-                      fetchMatchStatistics(
-                        selectedMatch
+                      fetchMatchDetails(
+                        detailMatch
                       )
                     }
                     className="mt-4 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-extrabold transition-all active:scale-95 cursor-pointer"
@@ -1055,8 +959,8 @@ export default function MatchesView({
                   <div className="grid grid-cols-[minmax(0,1fr)_140px_minmax(0,1fr)] sm:grid-cols-[minmax(0,1fr)_180px_minmax(0,1fr)] items-center px-3 sm:px-4 py-3 bg-white/[0.02] border-b border-white/[0.06]">
 
                     <div className="text-center text-xs font-bold text-white truncate px-2">
-                      {selectedMatch.home_team ||
-                        selectedMatch.tim_home ||
+                      {detailMatch.home_team ||
+                        detailMatch.tim_home ||
                         'Home'}
                     </div>
 
@@ -1065,8 +969,8 @@ export default function MatchesView({
                     </div>
 
                     <div className="text-center text-xs font-bold text-white truncate px-2">
-                      {selectedMatch.away_team ||
-                        selectedMatch.tim_away ||
+                      {detailMatch.away_team ||
+                        detailMatch.tim_away ||
                         'Away'}
                     </div>
 
@@ -1166,13 +1070,87 @@ export default function MatchesView({
 
               )}
 
+              {!isStatsLoading && !statsError && matchStatistics && (
+                <section className="mt-8" aria-labelledby="match-timeline-title">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <div>
+                      <h4 id="match-timeline-title" className="text-base font-extrabold text-white">Jalannya pertandingan</h4>
+                      <p className="text-xs text-slate-400 mt-1">Kejadian diurutkan berdasarkan menit pertandingan.</p>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] font-medium">
+                      <span className="inline-flex items-center gap-1 text-emerald-300"><ArrowUpRight aria-hidden="true" className="w-4 h-4" /> Masuk</span>
+                      <span className="inline-flex items-center gap-1 text-rose-300"><ArrowDownLeft aria-hidden="true" className="w-4 h-4" /> Keluar</span>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/[0.08] bg-slate-950/30 overflow-hidden">
+                    <div className="grid grid-cols-[minmax(0,1fr)_52px_minmax(0,1fr)] sm:grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)] items-center gap-2 px-3 sm:px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
+                      <div className="min-w-0 text-left">
+                        <p className="text-[9px] uppercase tracking-widest text-orange-300 mb-1">Home</p>
+                        <p className="text-xs font-bold text-white break-words">{homeName}</p>
+                      </div>
+                      <span className="text-[9px] uppercase tracking-wider text-slate-500 text-center">Menit</span>
+                      <div className="min-w-0 text-right">
+                        <p className="text-[9px] uppercase tracking-widest text-sky-300 mb-1">Away</p>
+                        <p className="text-xs font-bold text-white break-words">{awayName}</p>
+                      </div>
+                    </div>
+                    {timeline.length === 0 ? (
+                      <div className="px-5 py-10 text-center">
+                        <CircleDot aria-hidden="true" className="w-7 h-7 text-slate-600 mx-auto mb-3" />
+                        <p className="text-sm font-semibold text-slate-300">Belum ada kejadian tercatat</p>
+                        <p className="text-xs text-slate-500 mt-1">Gol, kartu, dan pergantian pemain akan muncul di sini.</p>
+                      </div>
+                    ) : (
+                      <ol className="relative px-3 sm:px-5 py-5 space-y-4">
+                        <li aria-hidden="true" className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-white/[0.08] pointer-events-none" />
+                        {timeline.map(({ kind, label, event }, index) => {
+                          const side = eventSide(event.team);
+                          const minute = String(event.minute).replace(/['′’]+$/, '');
+                          return (
+                            <li key={`${kind}-${event.team}-${event.minute}-${index}`} className="relative grid grid-cols-[minmax(0,1fr)_52px_minmax(0,1fr)] sm:grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)] gap-2 items-start">
+                              <span className="col-start-2 row-start-1 z-10 justify-self-center rounded-full border border-white/10 bg-[#111827] px-2 py-1.5 text-[10px] sm:text-xs font-bold tabular-nums text-slate-200 whitespace-nowrap">{minute ? `${minute}′` : '—'}</span>
+                              <div className={[
+                                'min-w-0 rounded-xl border p-2.5 sm:p-3',
+                                side === 'home' ? 'col-start-1 row-start-1 border-orange-400/15 bg-orange-400/[0.04] text-left' :
+                                side === 'away' ? 'col-start-3 row-start-1 border-sky-400/15 bg-sky-400/[0.04] text-right' :
+                                'col-span-3 row-start-2 z-10 border-white/10 bg-slate-900 text-center',
+                              ].join(' ')}>
+                                <div className={`flex items-center gap-1.5 mb-2 text-[10px] font-semibold text-slate-400 ${side === 'away' ? 'justify-end' : side === 'unknown' ? 'justify-center' : ''}`}>
+                                  {kind === 'goal' ? <svg aria-hidden="true" viewBox="0 0 24 24" className="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><circle cx="12" cy="12" r="9.5" /><path d="m12 7 4.8 3.5-1.8 5.6H9l-1.8-5.6Z" fill="currentColor" /><path d="M12 7V2.5m4.8 8 4.3-1.4M15 16.1l2.6 3.6M9 16.1l-2.6 3.6m.8-9.2L2.9 9.1" /></svg> :
+                                   kind === 'substitution' ? <Repeat2 aria-hidden="true" className="w-3.5 h-3.5 shrink-0" /> :
+                                   <span aria-hidden="true" className={`inline-block w-2.5 h-3.5 rounded-sm shrink-0 ${kind === 'yellow' ? 'bg-amber-300' : 'bg-rose-500'}`} />}
+                                  <span>{label}</span>
+                                </div>
+                                {'player_in' in event ? (
+                                  <div className="space-y-2.5">
+                                    <div className={`flex items-start gap-1.5 ${side === 'away' ? 'flex-row-reverse' : ''}`}>
+                                      <ArrowUpRight aria-hidden="true" className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                                      <div className="min-w-0"><span className="block text-[9px] uppercase tracking-wide text-emerald-300 mb-0.5">Masuk</span><p className="text-xs sm:text-sm font-semibold text-emerald-200 break-words leading-relaxed">{event.player_in}</p></div>
+                                    </div>
+                                    <div className={`flex items-start gap-1.5 ${side === 'away' ? 'flex-row-reverse' : ''}`}>
+                                      <ArrowDownLeft aria-hidden="true" className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                                      <div className="min-w-0"><span className="block text-[9px] uppercase tracking-wide text-rose-300 mb-0.5">Keluar</span><p className="text-xs sm:text-sm text-rose-200 break-words leading-relaxed">{event.player_out}</p></div>
+                                    </div>
+                                  </div>
+                                ) : <p className="text-xs sm:text-sm font-semibold text-white break-words leading-relaxed">{event.player}</p>}
+                                {side === 'unknown' && <p className="text-[10px] text-slate-400 mt-2">{event.team || 'Tim belum diketahui'}</p>}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    )}
+                  </div>
+                </section>
+              )}
+
               {/* ==================================================
                   STATUS
               ================================================== */}
-              {selectedMatch.status && (
+              {detailMatch.status && (
                 <div className="mt-4 text-center">
                   <span className="inline-flex px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-bold text-slate-400 uppercase">
-                    {selectedMatch.status}
+                    {detailMatch.status}
                   </span>
                 </div>
               )}
@@ -1279,6 +1257,7 @@ export default function MatchesView({
 
               <select
                 value={activeWeek}
+                disabled={resolvedSeason !== selectedSeason}
                 onChange={(event) =>
                   handleWeekChange(
                     event.target.value
@@ -1348,10 +1327,9 @@ export default function MatchesView({
             <button
               type="button"
               onClick={() =>
-                fetchMatchHistory(
-                  selectedSeason,
-                  activeWeek
-                )
+                resolvedSeason !== selectedSeason
+                  ? resolveLatestWeek(selectedSeason, () => false)
+                  : fetchMatchHistory(selectedSeason, activeWeek)
               }
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-xs transition-all active:scale-95 cursor-pointer"
             >
@@ -1446,6 +1424,7 @@ export default function MatchesView({
                 return (
                   <div
                     key={
+                      match.match_id ||
                       match._id ||
                       match.id ||
                       `${homeTeam}-${awayTeam}-${index}`
